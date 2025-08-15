@@ -1,0 +1,26 @@
+name: Deploy LASIAMA Platform
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy-api:
+    name: Deploy API to Render
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Render
+        uses: johnbeynon/render-deploy-action@v0.0.8
+        with:
+          service-id: ${{ secrets.RENDER_API_SERVICE_ID }}
+          api-key: ${{ secrets.RENDER_API_KEY }}
+
+  deploy-web:
+    name: Deploy Frontend to Render  
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Render
+        uses: johnbeynon/render-deploy-action@v0.0.8
+        with:
+          service-id: ${{ secrets.RENDER_WEB_SERVICE_ID }}
+          api-key: ${{ secrets.RENDER_API_KEY }}
