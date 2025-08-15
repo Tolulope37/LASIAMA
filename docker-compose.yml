@@ -1,0 +1,70 @@
+# LASIAMA Platform - Docker Compose Configuration
+# WARNING: This configuration is for DEVELOPMENT ONLY
+# Change all passwords and secrets before deploying to production!
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: lasiama
+      POSTGRES_PASSWORD: lasiama  # DEVELOPMENT ONLY - Change for production
+      POSTGRES_DB: lasiama
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin      # DEVELOPMENT ONLY
+      MINIO_ROOT_PASSWORD: minioadmin  # DEVELOPMENT ONLY
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  api:
+    build: ./apps/api
+    environment:
+      DATABASE_URL: postgres://lasiama:lasiama@db:5432/lasiama
+      JWT_SECRET: supersecret_jwt_dev_key_change_me  # DEVELOPMENT ONLY - Generate secure key for production
+      MINIO_ENDPOINT: minio
+      MINIO_ACCESS_KEY: minioadmin    # DEVELOPMENT ONLY
+      MINIO_SECRET_KEY: minioadmin    # DEVELOPMENT ONLY
+      MAIL_HOST: mailhog
+      MAIL_PORT: 1025
+      NODE_ENV: development
+    ports:
+      - "4000:4000"
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./apps/api:/usr/src/app
+
+  web:
+    build: ./apps/web
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_BASE: http://localhost:4000/api/v1
+    depends_on:
+      - api
+    volumes:
+      - ./apps/web:/usr/src/app
+
+volumes:
+  minio-data:

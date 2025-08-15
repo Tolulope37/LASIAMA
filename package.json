@@ -1,0 +1,11 @@
+{
+  "name": "lasiama-platform",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm -w apps/api run build && npm -w apps/web run build"
+  }
+}

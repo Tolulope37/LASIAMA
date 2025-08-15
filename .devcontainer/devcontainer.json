@@ -1,0 +1,22 @@
+{
+  "name": "LASIAMA Dev",
+  "dockerComposeFile": [
+    "../docker-compose.yml"
+  ],
+  "service": "api",
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  },
+  "remoteEnv": {
+    "DATABASE_URL": "postgres://lasiama:lasiama@db:5432/lasiama"
+  },
+  "postCreateCommand": "npm i --silent || true"
+}

@@ -1,0 +1,8 @@
+# LASIAMA Workspace Rules (Cursor)
+- Use TypeScript across API and Web.
+- Follow the existing API structure (Express, Postgres/PostGIS) and keep endpoints under /api/v1.
+- Prefer functional React components and hooks; no class components.
+- Use MapLibre GL on the web; do not add Mapbox-only APIs.
+- When adding DB columns, create a new SQL file in db/init with a higher numeric prefix (e.g., 002_add_x.sql). Avoid destructive migrations in dev without backups.
+- Keep secrets out of source control. Use .env files and docker-compose env vars.
+- Write small, testable functions. Avoid large route handlers; extract services where sensible.
