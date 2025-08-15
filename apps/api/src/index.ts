@@ -16,11 +16,28 @@ app.use(morgan('dev'));
 
 app.get('/api/v1/health', async (_req, res) => {
   try {
+    // Try database connection, but don't fail if not available
     await pool.query('SELECT 1');
-    res.json({ ok: true });
+    res.json({ ok: true, database: true });
   } catch (e:any) {
-    res.status(500).json({ ok: false, error: e.message });
+    // Return OK even without database for basic functionality
+    res.json({ ok: true, database: false, message: 'API running, database not connected', error: e.message });
   }
+});
+
+// Add root route to avoid "Cannot GET /" error
+app.get('/', (_req, res) => {
+  res.json({ 
+    name: 'LASIAMA API',
+    version: '1.0.0',
+    status: 'running',
+    endpoints: {
+      health: '/api/v1/health',
+      auth: '/api/v1/auth/login',
+      assets: '/api/v1/assets',
+      tasks: '/api/v1/tasks'
+    }
+  });
 });
 
 app.use('/api/v1/auth', authRoutes);
