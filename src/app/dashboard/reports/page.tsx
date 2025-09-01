@@ -9,7 +9,7 @@ export default function ReportsPage() {
       name: "Asset Summary Report",
       description: "Complete overview of all assets with current status and valuation",
       icon: "📊",
-      lastGenerated: "2024-01-15",
+      lastGenerated: "15/01/2024",
       frequency: "Monthly"
     },
     {
@@ -17,7 +17,7 @@ export default function ReportsPage() {
       name: "Maintenance Cost Analysis",
       description: "Detailed breakdown of maintenance expenses and budget utilization",
       icon: "💰",
-      lastGenerated: "2024-01-10",
+      lastGenerated: "10/01/2024",
       frequency: "Quarterly"
     },
     {
@@ -25,7 +25,7 @@ export default function ReportsPage() {
       name: "Fault Trends Report",
       description: "Analysis of fault patterns and resolution times across assets",
       icon: "📈",
-      lastGenerated: "2024-01-08",
+      lastGenerated: "08/01/2024",
       frequency: "Weekly"
     },
     {
@@ -33,7 +33,7 @@ export default function ReportsPage() {
       name: "Asset Utilization Report",
       description: "Usage statistics and efficiency metrics for all assets",
       icon: "⚡",
-      lastGenerated: "2024-01-12",
+      lastGenerated: "12/01/2024",
       frequency: "Monthly"
     }
   ])
@@ -44,7 +44,7 @@ export default function ReportsPage() {
       name: "December 2023 Asset Summary",
       type: "Asset Summary",
       generatedBy: "System",
-      generatedDate: "2024-01-01",
+      generatedDate: "01/01/2024",
       status: "Ready",
       fileSize: "2.4 MB"
     },
@@ -53,7 +53,7 @@ export default function ReportsPage() {
       name: "Q4 2023 Maintenance Analysis",
       type: "Maintenance Cost",
       generatedBy: "Admin User",
-      generatedDate: "2023-12-28",
+      generatedDate: "28/12/2023",
       status: "Ready",
       fileSize: "1.8 MB"
     }

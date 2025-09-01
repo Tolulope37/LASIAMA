@@ -103,8 +103,8 @@ const generateAssetData = (baseAsset: Record<string, unknown>) => {
       condition: baseAsset.condition,
       yearBuilt: baseAsset.yearBuilt,
       department: baseAsset.department,
-      lastInspection: "2025-07-15",
-      nextInspection: "2025-10-15",
+      lastInspection: "15/07/2025",
+      nextInspection: "15/10/2025",
       insurance: "Active - Lagos State Insurance",
       ownership: "Lagos State Government"
     },
@@ -116,7 +116,7 @@ const generateAssetData = (baseAsset: Record<string, unknown>) => {
       depreciationRate: "3% per annum",
       maintenanceBudget: "₦2.5M annually",
       insuranceValue: baseAsset.value,
-      lastValuation: "2025-01-15"
+      lastValuation: "15/01/2025"
     },
 
     // Annual Maintenance by Year (Default for non-healthcare assets)
@@ -242,18 +242,18 @@ const generateAssetData = (baseAsset: Record<string, unknown>) => {
             name: "Maintenance Report.pdf",
             type: "Report",
             size: "1.8 MB",
-            uploadDate: "2025-10-08",
+            uploadDate: "08/10/2025",
             url: `/documents/maintenance/MH-${baseAsset.id}-report.pdf`
           },
           {
             name: "Work Photos.zip",
             type: "Photos",
             size: "8.3 MB",
-            uploadDate: "2025-10-08",
+            uploadDate: "08/10/2025",
             url: `/documents/maintenance/MH-${baseAsset.id}-photos.zip`
           }
         ],
-        nextMaintenanceDate: "2026-01-08",
+        nextMaintenanceDate: "08/01/2026",
         warranty: "3 months on parts and labor",
         approvedBy: "Engr. Adebayo Ogundimu - Facility Manager",
         rating: 4.5
@@ -264,7 +264,7 @@ const generateAssetData = (baseAsset: Record<string, unknown>) => {
     auditTrail: [
       {
         id: "AT-001",
-        timestamp: "2025-12-15T14:30:22Z",
+        timestamp: "15/12/2025T14:30:22Z",
         action: "Asset Created",
         user: {
           name: "Engr. Adebayo Ogundimu",
@@ -295,7 +295,7 @@ const generateAssetData = (baseAsset: Record<string, unknown>) => {
     documents: [
       { name: "Building Plan Approval", type: "PDF", date: `${baseAsset.yearBuilt}-03-15`, size: "2.4MB" },
       { name: "Structural Drawings", type: "DWG", date: `${baseAsset.yearBuilt}-05-20`, size: "15.2MB" },
-      { name: "Insurance Policy", type: "PDF", date: "2025-01-01", size: "3.2MB" }
+      { name: "Insurance Policy", type: "PDF", date: "01/01/2025", size: "3.2MB" }
     ],
 
     // Images
@@ -305,7 +305,7 @@ const generateAssetData = (baseAsset: Record<string, unknown>) => {
         url: "/api/placeholder/800/600",
         title: `${baseAsset.name} - Main View`,
         type: "exterior",
-        date: "2025-08-01",
+        date: "01/08/2025",
         description: `Primary exterior view of ${baseAsset.name}`
       },
       {
@@ -313,7 +313,7 @@ const generateAssetData = (baseAsset: Record<string, unknown>) => {
         url: "/api/placeholder/800/600", 
         title: `${baseAsset.name} - Interior`,
         type: "interior",
-        date: "2025-08-01",
+        date: "01/08/2025",
         description: `Interior view showing main areas`
       }
     ],
@@ -533,12 +533,12 @@ const getAssetById = (id: string) => {
               contact: "+234-803-555-0123",
               address: "45 Industrial Estate, Ikeja, Lagos"
             },
-            lastService: "2025-07-15",
-            nextService: "2025-10-15",
+            lastService: "15/07/2025",
+            nextService: "15/10/2025",
             serviceInterval: "3 months",
             serviceTechnician: "Engr. Adebayo Ogundimu",
             condition: "Excellent",
-            warrantyExpiry: "2028-06-30",
+            warrantyExpiry: "30/06/2028",
             warrantyProvider: "Carrier Nigeria Ltd",
             maintenanceContract: "Annual Service Contract - ₦2.5M/year",
             operatingHours: "8,760 hours/year",
@@ -577,12 +577,12 @@ const getAssetById = (id: string) => {
               contact: "+234-803-555-0123",
               address: "45 Industrial Estate, Ikeja, Lagos"
             },
-            lastService: "2025-07-15",
-            nextService: "2025-10-15",
+            lastService: "15/07/2025",
+            nextService: "15/10/2025",
             serviceInterval: "3 months",
             serviceTechnician: "Engr. Adebayo Ogundimu",
             condition: "Excellent",
-            warrantyExpiry: "2028-06-30",
+            warrantyExpiry: "30/06/2028",
             warrantyProvider: "Carrier Nigeria Ltd",
             maintenanceContract: "Annual Service Contract - ₦2.5M/year",
             operatingHours: "8,760 hours/year",
@@ -623,12 +623,12 @@ const getAssetById = (id: string) => {
               contact: "+234-807-555-0456",
               address: "12 Climate Street, Victoria Island, Lagos"
             },
-            lastService: "2025-08-01",
-            nextService: "2025-11-01",
+            lastService: "01/08/2025",
+            nextService: "01/11/2025",
             serviceInterval: "3 months",
             serviceTechnician: "Engr. Fatima Abdullahi",
             condition: "Excellent",
-            warrantyExpiry: "2030-03-15",
+            warrantyExpiry: "15/03/2030",
             warrantyProvider: "Daikin Nigeria",
             maintenanceContract: "Premium Service Plan - ₦1.8M/year",
             operatingHours: "6,570 hours/year",
@@ -668,12 +668,12 @@ const getAssetById = (id: string) => {
               contact: "+234-809-555-0789",
               address: "78 Cooling Avenue, Surulere, Lagos"
             },
-            lastService: "2025-06-20",
-            nextService: "2025-09-20",
+            lastService: "20/06/2025",
+            nextService: "20/09/2025",
             serviceInterval: "3 months",
             serviceTechnician: "Tech. Ibrahim Musa",
             condition: "Good",
-            warrantyExpiry: "2026-08-10",
+            warrantyExpiry: "10/08/2026",
             warrantyProvider: "LG Electronics Nigeria",
             maintenanceContract: "Basic Service Plan - ₦180K/year",
             operatingHours: "8,760 hours/year",
@@ -713,12 +713,12 @@ const getAssetById = (id: string) => {
               contact: "+234-812-555-0234",
               address: "25 Arctic Plaza, Lekki Phase 1, Lagos"
             },
-            lastService: "2025-07-30",
-            nextService: "2025-10-30",
+            lastService: "30/07/2025",
+            nextService: "30/10/2025",
             serviceInterval: "3 months",
             serviceTechnician: "Engr. Chioma Okwu",
             condition: "Excellent",
-            warrantyExpiry: "2031-01-20",
+            warrantyExpiry: "20/01/2031",
             warrantyProvider: "Samsung Electronics Nigeria",
             maintenanceContract: "Premium Care - ₦250K/year",
             operatingHours: "6,570 hours/year",
@@ -728,7 +728,7 @@ const getAssetById = (id: string) => {
             specialFeatures: ["Digital Inverter", "Wind-Free Cooling", "Easy Filter Plus", "Good Sleep Mode"],
             filterType: "HEPA + Carbon Filter",
             filterChangeInterval: "6 months",
-            lastFilterChange: "2025-06-15"
+            lastFilterChange: "15/06/2025"
           },
           {
             id: "AC-006",
@@ -762,12 +762,12 @@ const getAssetById = (id: string) => {
               contact: "+234-815-555-0567",
               address: "88 Tech Hub, Computer Village, Ikeja"
             },
-            lastService: "2025-08-10",
-            nextService: "2025-09-10",
+            lastService: "10/08/2025",
+            nextService: "10/09/2025",
             serviceInterval: "1 month",
             serviceTechnician: "Engr. Olumide Adeyemi",
             condition: "Excellent",
-            warrantyExpiry: "2030-12-31",
+            warrantyExpiry: "31/12/2030",
             warrantyProvider: "Stulz Nigeria",
             maintenanceContract: "Critical Systems Plan - ₦850K/year",
             operatingHours: "8,760 hours/year (24/7)",
@@ -809,12 +809,12 @@ const getAssetById = (id: string) => {
               contact: "+234-806-555-0890",
               address: "156 Climate Road, Yaba, Lagos"
             },
-            lastService: "2025-05-25",
-            nextService: "2025-08-25",
+            lastService: "25/05/2025",
+            nextService: "25/08/2025",
             serviceInterval: "3 months",
             serviceTechnician: "Engr. Kemi Adebisi",
             condition: "Good",
-            warrantyExpiry: "2027-04-15",
+            warrantyExpiry: "15/04/2027",
             warrantyProvider: "Trane Nigeria",
             maintenanceContract: "Standard Service - ₦680K/year",
             operatingHours: "4,380 hours/year",
@@ -838,7 +838,7 @@ const getAssetById = (id: string) => {
             features: "Automatic Sliding, Access Control",
             yearInstalled: 2018,
             installedBy: "Access Control Systems Ltd",
-            lastMaintenance: "2025-06-15",
+            lastMaintenance: "15/06/2025",
             condition: "Excellent",
             accessLevel: "Public"
           },
@@ -852,7 +852,7 @@ const getAssetById = (id: string) => {
             features: "Fire-rated 90 minutes, Panic Bar",
             yearInstalled: 1978,
             installedBy: "Original Construction",
-            lastMaintenance: "2025-05-20",
+            lastMaintenance: "20/05/2025",
             condition: "Good",
             accessLevel: "Emergency Only"
           },
@@ -866,7 +866,7 @@ const getAssetById = (id: string) => {
             features: "Hermetic Seal, Automatic",
             yearInstalled: 2020,
             installedBy: "Medical Equipment Solutions",
-            lastMaintenance: "2025-08-05",
+            lastMaintenance: "05/08/2025",
             condition: "Excellent",
             accessLevel: "Authorized Personnel"
           }
@@ -884,7 +884,7 @@ const getAssetById = (id: string) => {
             yearInstalled: 2018,
             installedBy: "Lagos Glass & Aluminum",
             features: "UV Protection, Energy Efficient",
-            lastMaintenance: "2025-04-10",
+            lastMaintenance: "10/04/2025",
             condition: "Excellent"
           },
           {
@@ -898,7 +898,7 @@ const getAssetById = (id: string) => {
             yearInstalled: 1978,
             installedBy: "Original Construction",
             features: "Manual Operation, Security Locks",
-            lastMaintenance: "2025-03-25",
+            lastMaintenance: "25/03/2025",
             condition: "Fair"
           }
         ],
@@ -914,7 +914,7 @@ const getAssetById = (id: string) => {
             location: "General Areas",
             yearInstalled: 2019,
             installedBy: "Bright Light Electrical",
-            lastReplacement: "2025-02-14",
+            lastReplacement: "14/02/2025",
             condition: "Excellent",
             lifespan: "50,000 hours"
           },
@@ -928,7 +928,7 @@ const getAssetById = (id: string) => {
             location: "Operating Theaters",
             yearInstalled: 2020,
             installedBy: "Medical Equipment Solutions",
-            lastMaintenance: "2025-07-20",
+            lastMaintenance: "20/07/2025",
             condition: "Excellent",
             features: "Shadow-free, Color Temperature Control"
           },
@@ -943,7 +943,7 @@ const getAssetById = (id: string) => {
             yearInstalled: 2018,
             installedBy: "Emergency Systems Ltd",
             batteryLife: "3 hours",
-            lastTest: "2025-08-01",
+            lastTest: "01/08/2025",
             condition: "Good"
           }
         ],
@@ -970,7 +970,7 @@ const getAssetById = (id: string) => {
             yearInstalled: 2020,
             installedBy: "Medical Gas Systems Ltd",
             pressure: "Oxygen: 4.1 bar, Vacuum: -0.4 bar",
-            lastInspection: "2025-06-30",
+            lastInspection: "30/06/2025",
             condition: "Excellent",
             certification: "HTM 02-01 Compliant"
           }
@@ -986,9 +986,9 @@ const getAssetById = (id: string) => {
             voltage: "415V/240V",
             yearInstalled: 2018,
             installedBy: "Power Systems Engineering",
-            lastInspection: "2025-07-10",
+            lastInspection: "10/07/2025",
             condition: "Excellent",
-            certificationDate: "2025-07-10"
+            certificationDate: "10/07/2025"
           },
           {
             id: "EL-002",
@@ -1000,7 +1000,7 @@ const getAssetById = (id: string) => {
             location: "Critical Care Areas",
             yearInstalled: 2019,
             installedBy: "Uninterrupted Power Ltd",
-            lastBatteryChange: "2024-11-15",
+            lastBatteryChange: "15/11/2024",
             condition: "Excellent"
           }
         ],
@@ -1016,7 +1016,7 @@ const getAssetById = (id: string) => {
             storage: "30 days recording",
             yearInstalled: 2021,
             installedBy: "SecureVision Systems",
-            lastUpgrade: "2024-12-01",
+            lastUpgrade: "01/12/2024",
             condition: "Excellent"
           },
           {
@@ -1028,7 +1028,7 @@ const getAssetById = (id: string) => {
             location: "All Entry Points",
             yearInstalled: 2020,
             installedBy: "Access Solutions Ltd",
-            lastUpdate: "2025-03-15",
+            lastUpdate: "15/03/2025",
             condition: "Excellent",
             users: 1250
           }
@@ -1106,39 +1106,39 @@ const getAssetById = (id: string) => {
               name: "Maintenance Report.pdf",
               type: "Report",
               size: "2.3 MB",
-              uploadDate: "2025-10-08",
+              uploadDate: "08/10/2025",
               url: "/documents/maintenance/MH-001-report.pdf"
             },
             {
               name: "Before Photos.zip",
               type: "Photos",
               size: "15.7 MB", 
-              uploadDate: "2025-10-08",
+              uploadDate: "08/10/2025",
               url: "/documents/maintenance/MH-001-before.zip"
             },
             {
               name: "After Photos.zip",
               type: "Photos",
               size: "12.4 MB",
-              uploadDate: "2025-10-08",
+              uploadDate: "08/10/2025",
               url: "/documents/maintenance/MH-001-after.zip"
             },
             {
               name: "Parts Invoice.pdf",
               type: "Invoice",
               size: "856 KB",
-              uploadDate: "2025-10-08", 
+              uploadDate: "08/10/2025", 
               url: "/documents/maintenance/MH-001-invoice.pdf"
             },
             {
               name: "System Performance Test.pdf",
               type: "Test Results",
               size: "1.2 MB",
-              uploadDate: "2025-10-08",
+              uploadDate: "08/10/2025",
               url: "/documents/maintenance/MH-001-test.pdf"
             }
           ],
-          nextMaintenanceDate: "2026-01-08",
+          nextMaintenanceDate: "08/01/2026",
           warranty: "6 months on parts and labor",
           approvedBy: "Engr. Adebayo Ogundimu - Facility Manager",
           rating: 4.8
@@ -1179,32 +1179,32 @@ const getAssetById = (id: string) => {
               name: "Emergency Work Order.pdf",
               type: "Work Order",
               size: "1.1 MB",
-              uploadDate: "2025-07-25",
+              uploadDate: "25/07/2025",
               url: "/documents/maintenance/MH-002-workorder.pdf"
             },
             {
               name: "Diagnostic Report.pdf", 
               type: "Diagnostic",
               size: "3.2 MB",
-              uploadDate: "2025-07-25",
+              uploadDate: "25/07/2025",
               url: "/documents/maintenance/MH-002-diagnostic.pdf"
             },
             {
               name: "Load Test Results.pdf",
               type: "Test Results", 
               size: "2.1 MB",
-              uploadDate: "2025-07-25",
+              uploadDate: "25/07/2025",
               url: "/documents/maintenance/MH-002-loadtest.pdf"
             },
             {
               name: "Parts Receipt.pdf",
               type: "Receipt",
               size: "654 KB",
-              uploadDate: "2025-07-25",
+              uploadDate: "25/07/2025",
               url: "/documents/maintenance/MH-002-receipt.pdf"
             }
           ],
-          nextMaintenanceDate: "2025-10-25",
+          nextMaintenanceDate: "25/10/2025",
           warranty: "12 months on pump, 3 months on labor",
           approvedBy: "Engr. Kemi Adebayo - Chief Engineer",
           rating: 4.9
@@ -1245,39 +1245,39 @@ const getAssetById = (id: string) => {
               name: "Fire Safety Inspection Report.pdf",
               type: "Inspection Report",
               size: "4.7 MB",
-              uploadDate: "2025-07-15",
+              uploadDate: "15/07/2025",
               url: "/documents/maintenance/MH-003-inspection.pdf"
             },
             {
               name: "Compliance Certificate.pdf",
               type: "Certificate",
               size: "1.8 MB",
-              uploadDate: "2025-07-15", 
+              uploadDate: "15/07/2025", 
               url: "/documents/maintenance/MH-003-certificate.pdf"
             },
             {
               name: "Test Results Summary.pdf",
               type: "Test Results",
               size: "2.9 MB",
-              uploadDate: "2025-07-15",
+              uploadDate: "15/07/2025",
               url: "/documents/maintenance/MH-003-tests.pdf"
             },
             {
               name: "System Photos.zip",
               type: "Photos",
               size: "18.3 MB",
-              uploadDate: "2025-07-15",
+              uploadDate: "15/07/2025",
               url: "/documents/maintenance/MH-003-photos.zip"
             },
             {
               name: "Deficiency List.pdf",
               type: "Report",
               size: "967 KB",
-              uploadDate: "2025-07-15",
+              uploadDate: "15/07/2025",
               url: "/documents/maintenance/MH-003-deficiencies.pdf"
             }
           ],
-          nextMaintenanceDate: "2026-07-15",
+          nextMaintenanceDate: "15/07/2026",
           warranty: "12 months on parts and services",
           approvedBy: "Engr. Adebayo Ogundimu - Facility Manager",
           rating: 4.7
@@ -1288,7 +1288,7 @@ const getAssetById = (id: string) => {
       auditTrail: [
         {
           id: "AT-001",
-          timestamp: "2025-12-15T14:30:22Z",
+          timestamp: "15/12/2025T14:30:22Z",
           action: "Asset Created",
           user: {
             name: "Engr. Adebayo Ogundimu",
@@ -1332,7 +1332,7 @@ const getAssetById = (id: string) => {
               { field: "Model", oldValue: null, newValue: "MAGNETOM Vida 3T" },
               { field: "Serial Number", oldValue: null, newValue: "SMN-2025-VIDA-001" },
               { field: "Purchase Cost", oldValue: null, newValue: "₦2.8 Billion" },
-              { field: "Installation Date", oldValue: null, newValue: "2025-12-05" }
+              { field: "Installation Date", oldValue: null, newValue: "05/12/2025" }
             ]
           },
           ipAddress: "192.168.1.78",
@@ -1362,7 +1362,7 @@ const getAssetById = (id: string) => {
             summary: "Scheduled preventive maintenance for HVAC systems",
             fields: [
               { field: "Maintenance Type", oldValue: null, newValue: "Preventive" },
-              { field: "Scheduled Date", oldValue: null, newValue: "2025-12-15" },
+              { field: "Scheduled Date", oldValue: null, newValue: "15/12/2025" },
               { field: "Estimated Cost", oldValue: null, newValue: "₦2.5M" },
               { field: "Contractor", oldValue: null, newValue: "Cool Breeze Engineering" },
               { field: "Work Order", oldValue: null, newValue: "WO-2025-1215" }
@@ -1382,7 +1382,7 @@ const getAssetById = (id: string) => {
         },
         {
           id: "AT-004",
-          timestamp: "2025-11-20T11:30:45Z",
+          timestamp: "20/11/2025T11:30:45Z",
           action: "Asset Value Updated",
           user: {
             name: "Mrs. Folake Adeniyi",
@@ -1395,7 +1395,7 @@ const getAssetById = (id: string) => {
             summary: "Annual asset revaluation completed",
             fields: [
               { field: "Asset Value", oldValue: "₦42.8 Billion", newValue: "₦45.2 Billion" },
-              { field: "Valuation Date", oldValue: "2024-11-20", newValue: "2025-11-20" },
+              { field: "Valuation Date", oldValue: "20/11/2024", newValue: "20/11/2025" },
               { field: "Valuation Method", oldValue: "Depreciated Replacement Cost", newValue: "Market Comparison Approach" },
               { field: "Depreciation Rate", oldValue: "5% per annum", newValue: "4.5% per annum" }
             ]
@@ -1414,7 +1414,7 @@ const getAssetById = (id: string) => {
         },
         {
           id: "AT-005",
-          timestamp: "2025-10-15T13:22:18Z",
+          timestamp: "15/10/2025T13:22:18Z",
           action: "Security Update",
           user: {
             name: "CSP Adamu Garba",
@@ -1461,7 +1461,7 @@ const getAssetById = (id: string) => {
               { field: "Overall Condition", oldValue: "Good", newValue: "Excellent" },
               { field: "Structural Rating", oldValue: "8.2/10", newValue: "8.7/10" },
               { field: "Maintenance Priority", oldValue: "Medium", newValue: "Low" },
-              { field: "Next Inspection", oldValue: "2025-12-08", newValue: "2026-03-08" }
+              { field: "Next Inspection", oldValue: "08/12/2025", newValue: "08/03/2026" }
             ]
           },
           ipAddress: "192.168.1.89",
@@ -1474,14 +1474,14 @@ const getAssetById = (id: string) => {
       
       // Documents & Certificates
       documents: [
-        { name: "Building Plan Approval", type: "PDF", date: "1977-03-15", size: "2.4MB" },
-        { name: "Structural Drawings", type: "DWG", date: "1977-05-20", size: "15.2MB" },
-        { name: "Electrical Drawings", type: "DWG", date: "1977-06-10", size: "8.7MB" },
-        { name: "Plumbing Drawings", type: "DWG", date: "1977-06-15", size: "6.3MB" },
-        { name: "Fire Certificate", type: "PDF", date: "2024-11-20", size: "1.1MB" },
-        { name: "Insurance Policy", type: "PDF", date: "2025-01-01", size: "3.2MB" },
-        { name: "Environmental Impact Assessment", type: "PDF", date: "2018-03-10", size: "12.8MB" },
-        { name: "Medical Equipment Inventory", type: "XLSX", date: "2025-08-01", size: "4.5MB" }
+        { name: "Building Plan Approval", type: "PDF", date: "15/03/1977", size: "2.4MB" },
+        { name: "Structural Drawings", type: "DWG", date: "20/05/1977", size: "15.2MB" },
+        { name: "Electrical Drawings", type: "DWG", date: "10/06/1977", size: "8.7MB" },
+        { name: "Plumbing Drawings", type: "DWG", date: "15/06/1977", size: "6.3MB" },
+        { name: "Fire Certificate", type: "PDF", date: "20/11/2024", size: "1.1MB" },
+        { name: "Insurance Policy", type: "PDF", date: "01/01/2025", size: "3.2MB" },
+        { name: "Environmental Impact Assessment", type: "PDF", date: "10/03/2018", size: "12.8MB" },
+        { name: "Medical Equipment Inventory", type: "XLSX", date: "01/08/2025", size: "4.5MB" }
       ],
       
       // Images and Media
@@ -1491,7 +1491,7 @@ const getAssetById = (id: string) => {
           url: "/api/placeholder/800/600",
           title: "Hospital Main Entrance",
           type: "exterior",
-          date: "2025-08-10",
+          date: "10/08/2025",
           description: "Main entrance with patient drop-off area"
         },
         {
@@ -1499,7 +1499,7 @@ const getAssetById = (id: string) => {
           url: "/api/placeholder/800/600",
           title: "Emergency Department",
           type: "interior",
-          date: "2025-08-10",
+          date: "10/08/2025",
           description: "24/7 emergency care facility"
         },
         {
@@ -1507,7 +1507,7 @@ const getAssetById = (id: string) => {
           url: "/api/placeholder/800/600",
           title: "Operating Theater Complex",
           type: "interior",
-          date: "2025-08-10",
+          date: "10/08/2025",
           description: "State-of-the-art surgical facilities"
         },
         {
@@ -1515,7 +1515,7 @@ const getAssetById = (id: string) => {
           url: "/api/placeholder/800/600",
           title: "Medical Equipment Room",
           type: "interior",
-          date: "2025-08-10",
+          date: "10/08/2025",
           description: "Advanced medical diagnostic equipment"
         },
         {
@@ -1523,7 +1523,7 @@ const getAssetById = (id: string) => {
           url: "/api/placeholder/800/600",
           title: "Hospital Aerial View",
           type: "aerial",
-          date: "2025-07-25",
+          date: "25/07/2025",
           description: "Complete hospital complex from above"
         },
         {
@@ -1531,7 +1531,7 @@ const getAssetById = (id: string) => {
           url: "/api/placeholder/800/600",
           title: "Architectural Floor Plan - Ground Floor",
           type: "drawing",
-          date: "1977-05-20",
+          date: "20/05/1977",
           description: "Original architectural drawings - Ground floor layout"
         },
         {
@@ -1539,7 +1539,7 @@ const getAssetById = (id: string) => {
           url: "/api/placeholder/800/600",
           title: "Electrical System Diagram",
           type: "drawing",
-          date: "1977-06-10",
+          date: "10/06/1977",
           description: "Complete electrical system layout and specifications"
         },
         {
@@ -1547,7 +1547,7 @@ const getAssetById = (id: string) => {
           url: "/api/placeholder/800/600",
           title: "Plumbing & Medical Gas Layout",
           type: "drawing",
-          date: "1977-06-15",
+          date: "15/06/1977",
           description: "Water supply, drainage, and medical gas distribution"
         }
       ],
