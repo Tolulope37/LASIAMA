@@ -313,6 +313,101 @@ export default function AssetsPage() {
     const selectedCategory = categories.find(cat => cat.value === filters.category)
     return selectedCategory ? selectedCategory.subcategories : []
   }
+
+  // Filter assets based on current filters
+  const getFilteredAssets = () => {
+    return assets.filter(asset => {
+      // Search filter
+      if (filters.search) {
+        const searchTerm = filters.search.toLowerCase()
+        const matchesSearch = 
+          asset.name.toLowerCase().includes(searchTerm) ||
+          asset.number.toLowerCase().includes(searchTerm) ||
+          asset.location.toLowerCase().includes(searchTerm) ||
+          asset.category.toLowerCase().includes(searchTerm) ||
+          asset.subcategory.toLowerCase().includes(searchTerm) ||
+          asset.department.toLowerCase().includes(searchTerm)
+        
+        if (!matchesSearch) return false
+      }
+
+      // Status filter
+      if (filters.status !== 'all' && asset.status.toLowerCase() !== filters.status.toLowerCase()) {
+        return false
+      }
+
+      // Category filter
+      if (filters.category !== 'all') {
+        const categoryMatch = categories.find(cat => cat.value === filters.category)
+        if (categoryMatch && asset.category !== categoryMatch.label) {
+          return false
+        }
+      }
+
+      // Subcategory filter
+      if (filters.subcategory !== 'all') {
+        const subcategoryMatch = getSubcategories().find(sub => sub.value === filters.subcategory)
+        if (subcategoryMatch && asset.subcategory !== subcategoryMatch.label) {
+          return false
+        }
+      }
+
+      // Location filter (simplified - checking if location contains the filter)
+      if (filters.location !== 'all') {
+        const locationMatch = locations.find(loc => loc.value === filters.location)
+        if (locationMatch && !asset.location.toLowerCase().includes(locationMatch.label.toLowerCase().replace(' lga', ''))) {
+          return false
+        }
+      }
+
+      // Department filter
+      if (filters.department !== 'all') {
+        const departmentMatch = departments.find(dept => dept.value === filters.department)
+        if (departmentMatch && asset.department !== departmentMatch.label) {
+          return false
+        }
+      }
+
+      // Condition filter
+      if (filters.condition !== 'all' && asset.condition.toLowerCase() !== filters.condition.toLowerCase()) {
+        return false
+      }
+
+      // Year built range filter
+      if (filters.yearBuiltFrom && asset.yearBuilt < parseInt(filters.yearBuiltFrom)) {
+        return false
+      }
+      if (filters.yearBuiltTo && asset.yearBuilt > parseInt(filters.yearBuiltTo)) {
+        return false
+      }
+
+      // Value range filter
+      if (filters.value !== 'all' && asset.valueRange !== filters.value) {
+        return false
+      }
+
+      // Size range filter
+      if (filters.size !== 'all' && asset.sizeRange !== filters.size) {
+        return false
+      }
+
+      // Date range filter (if asset has dateAdded property)
+      if (filters.dateFrom && asset.dateAdded) {
+        const assetDate = new Date(asset.dateAdded)
+        const fromDate = new Date(filters.dateFrom)
+        if (assetDate < fromDate) return false
+      }
+      if (filters.dateTo && asset.dateAdded) {
+        const assetDate = new Date(asset.dateAdded)
+        const toDate = new Date(filters.dateTo)
+        if (assetDate > toDate) return false
+      }
+
+      return true
+    })
+  }
+
+  const filteredAssets = getFilteredAssets()
   const [assets] = useState([
     {
       id: 1,
@@ -769,7 +864,11 @@ export default function AssetsPage() {
                       Clear All
                     </button>
                     <button
-                      onClick={() => alert('Filters applied! In a real app, this would filter the assets list.')}
+                      onClick={() => {
+                        // Filters are applied automatically via the filteredAssets computed value
+                        // This button could trigger additional actions like analytics tracking
+                        console.log('Filters applied:', filters)
+                      }}
                       className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded"
                     >
                       Apply Filters
@@ -781,9 +880,42 @@ export default function AssetsPage() {
           </div>
         </div>
 
+        {/* Results Summary */}
+        <div className="mb-6 flex justify-between items-center">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            Showing {filteredAssets.length} of {assets.length} assets
+            {Object.values(filters).filter(v => v && v !== 'all').length > 0 && (
+              <span className="ml-2 text-blue-600 dark:text-blue-400">
+                (filtered)
+              </span>
+            )}
+          </div>
+          {filteredAssets.length > 0 && (
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              Total value: {filteredAssets.reduce((sum, asset) => {
+                // Simple value calculation - in a real app this would be more sophisticated
+                const valueStr = asset.value.replace('₦', '').replace('B', '').replace('M', '')
+                const multiplier = asset.value.includes('B') ? 1000000000 : asset.value.includes('M') ? 1000000 : 1
+                return sum + (parseFloat(valueStr) * multiplier)
+              }, 0).toLocaleString('en-NG', { style: 'currency', currency: 'NGN' })}
+            </div>
+          )}
+        </div>
+
         {/* Assets Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {assets.map((asset) => (
+          {filteredAssets.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No assets found</h3>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Try adjusting your filters or search terms.
+              </p>
+            </div>
+          ) : (
+            filteredAssets.map((asset) => (
             <div key={asset.id} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
@@ -864,7 +996,7 @@ export default function AssetsPage() {
                 </div>
               </div>
             </div>
-          ))}
+          )))}
         </div>
       </div>
     </div>
