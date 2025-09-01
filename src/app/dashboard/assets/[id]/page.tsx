@@ -439,23 +439,33 @@ const generateAssetData = (baseAsset: Record<string, unknown>) => {
   }
 }
 
-// Mock asset data with comprehensive details
+// Mock asset data with comprehensive details - Dynamic approach
 const getAssetById = (id: string) => {
-  // Base asset data that matches the assets in the main assets page
-  const baseAssets = [
-    { id: 1, name: "Lagos State General Hospital Main Building", type: "Healthcare Facility", category: "Healthcare", subcategory: "General Hospital", location: "Ikeja, Lagos State", department: "Ministry of Health", yearBuilt: 1978, value: "₦2.5B", size: "Large", condition: "Good", status: "ACTIVE", openFaults: 0, maintenance: 1, updated: "15/08/2025" },
-    { id: 2, name: "Lagos State University Main Campus", type: "Educational Institution", category: "Education", subcategory: "University", location: "Ojo, Lagos State", department: "Ministry of Education", yearBuilt: 1983, value: "₦8.2B", size: "Large", condition: "Excellent", status: "ACTIVE", openFaults: 0, maintenance: 0, updated: "12/08/2025" },
-    { id: 3, name: "Lagos State Secretariat Complex", type: "Government Building", category: "Government", subcategory: "Administrative Complex", location: "Alausa, Ikeja, Lagos State", department: "Lagos State Government", yearBuilt: 1999, value: "₦12.8B", size: "Large", condition: "Excellent", status: "ACTIVE", openFaults: 0, maintenance: 0, updated: "10/08/2025" },
-    { id: 4, name: "Third Mainland Bridge", type: "Infrastructure", category: "Infrastructure", subcategory: "Bridges & Flyovers", location: "Lagos Island to Lagos Mainland", department: "Ministry of Works & Infrastructure", yearBuilt: 1990, value: "₦45B", size: "Large", condition: "Good", status: "ACTIVE", openFaults: 1, maintenance: 2, updated: "08/08/2025" },
-    { id: 5, name: "BRT Bus Fleet (200 Units)", type: "Transportation", category: "Transportation", subcategory: "BRT Buses", location: "Various BRT Terminals", department: "Ministry of Transportation", yearBuilt: 2019, value: "₦8.5B", size: "Large", condition: "Good", status: "ACTIVE", openFaults: 5, maintenance: 12, updated: "20/08/2025" },
-    { id: 6, name: "Tafawa Balewa Square", type: "Recreational Facility", category: "Recreation", subcategory: "Public Parks", location: "Lagos Island, Lagos State", department: "Lagos State Government", yearBuilt: 1972, value: "₦850M", size: "Large", condition: "Fair", status: "ACTIVE", openFaults: 0, maintenance: 1, updated: "05/08/2025" },
-    { id: 7, name: "Lagos State Primary Healthcare Center", type: "Healthcare Facility", category: "Healthcare", subcategory: "Primary Healthcare Centers", location: "Surulere, Lagos State", department: "Ministry of Health", yearBuilt: 2015, value: "₦45M", size: "Small", condition: "Excellent", status: "ACTIVE", openFaults: 0, maintenance: 0, updated: "18/08/2025" },
-    { id: 8, name: "Adeniran Ogunsanya College of Education", type: "Educational Institution", category: "Education", subcategory: "Technical Colleges", location: "Oto/Ijanikin, Lagos State", department: "Ministry of Education", yearBuilt: 1975, value: "₦1.2B", size: "Large", condition: "Good", status: "ACTIVE", openFaults: 1, maintenance: 0, updated: "14/08/2025" },
-    { id: 9, name: "Lagos High Court Complex", type: "Government Building", category: "Government", subcategory: "Court Buildings", location: "Lagos Island, Lagos State", department: "Ministry of Justice", yearBuilt: 1973, value: "₦680M", size: "Large", condition: "Good", status: "ACTIVE", openFaults: 0, maintenance: 1, updated: "11/08/2025" }
-  ]
-
-  const baseAsset = baseAssets.find(asset => asset.id.toString() === id)
-  if (!baseAsset) return null
+  // This would normally come from an API or database
+  // For now, we'll create a basic asset structure and generate comprehensive details dynamically
+  const assetId = parseInt(id)
+  if (isNaN(assetId) || assetId < 1 || assetId > 43) return null
+  
+  // Create a base asset structure with common properties
+  const baseAsset = {
+    id: assetId,
+    name: `Asset ${assetId}`,
+    number: `#LAS-AST-${assetId.toString().padStart(3, '0')}`,
+    location: "Lagos State",
+    category: "Government Asset",
+    subcategory: "General Asset",
+    status: "ACTIVE",
+    openFaults: Math.floor(Math.random() * 3),
+    maintenance: Math.floor(Math.random() * 3),
+    updated: "01/09/2025",
+    department: "Lagos State Government",
+    yearBuilt: 1990 + Math.floor(Math.random() * 30),
+    value: "₦1.5B",
+    valueRange: "over-1b",
+    size: "10,000 sqm",
+    sizeRange: "large",
+    condition: ["Excellent", "Good", "Fair"][Math.floor(Math.random() * 3)]
+  }
 
   // Generate comprehensive asset data based on the base asset
   const assets = {
@@ -1798,6 +1808,33 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
   }
   
   const asset = getAssetById(params.id)
+  
+  // Handle case when asset is not found
+  if (!asset) {
+    return (
+      <div className="flex-1 overflow-auto">
+        <div className="p-6">
+          <div className="text-center py-12">
+            <div className="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Asset Not Found</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              The asset with ID "{params.id}" could not be found or may have been removed.
+            </p>
+            <button
+              onClick={() => router.push('/dashboard/assets')}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            >
+              Back to Assets
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
   
   // Get all equipment for filtering
   const getAllEquipment = () => {

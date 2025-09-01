@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 
 interface EquipmentItem {
@@ -122,7 +122,15 @@ export default function NewAssetPage() {
     }))
   }
 
-  const generateAssetNumber = (category: string) => {
+  // Auto-generate asset number when category, location, or LGA changes
+  useEffect(() => {
+    if (formData.category && (formData.location || formData.lga) && !formData.number) {
+      const generatedNumber = generateAssetNumber(formData.category, formData.location, formData.lga)
+      setFormData(prev => ({ ...prev, number: generatedNumber }))
+    }
+  }, [formData.category, formData.location, formData.lga])
+
+  const generateAssetNumber = (category: string, location?: string, lga?: string) => {
     const categoryCode = {
       'Healthcare': 'HLT',
       'Education': 'EDU', 
@@ -137,8 +145,54 @@ export default function NewAssetPage() {
       'Equipment': 'EQP'
     }[category] || 'GEN'
     
+    // Generate location-based code from LGA or location
+    let locationCode = ''
+    if (lga) {
+      // Use LGA for location code
+      const lgaCode = {
+        'Ikeja': 'IKJ',
+        'Lagos Island': 'LGI', 
+        'Lagos Mainland': 'LGM',
+        'Surulere': 'SUR',
+        'Ojo': 'OJO',
+        'Alimosho': 'ALM',
+        'Agege': 'AGE',
+        'Ifako-Ijaiye': 'IFJ',
+        'Shomolu': 'SHM',
+        'Mushin': 'MSH',
+        'Oshodi-Isolo': 'OSH',
+        'Kosofe': 'KOS',
+        'Ikorodu': 'IKR',
+        'Epe': 'EPE',
+        'Badagry': 'BAD',
+        'Ajeromi-Ifelodun': 'AJR',
+        'Amuwo-Odofin': 'AMW',
+        'Apapa': 'APA',
+        'Eti-Osa': 'ETO',
+        'Ibeju-Lekki': 'IBL'
+      }[lga] || lga.substring(0, 3).toUpperCase()
+      locationCode = lgaCode
+    } else if (location) {
+      // Extract location code from address
+      const locationWords = location.split(/[\s,]+/)
+      if (locationWords.length >= 2) {
+        locationCode = locationWords.slice(0, 2).map(word => word.charAt(0).toUpperCase()).join('')
+      } else {
+        locationCode = location.substring(0, 3).toUpperCase().replace(/[^A-Z]/g, '')
+      }
+      // Ensure it's exactly 3 characters
+      locationCode = locationCode.padEnd(3, 'X').substring(0, 3)
+    }
+    
     const randomId = Math.floor(Math.random() * 900) + 100
-    return `#LAS-${categoryCode}-${randomId.toString().padStart(3, '0')}`
+    const baseNumber = `LAS-${categoryCode}-${randomId.toString().padStart(3, '0')}`
+    
+    // Add location code if available
+    if (locationCode) {
+      return `#${baseNumber}-${locationCode}`
+    }
+    
+    return `#${baseNumber}`
   }
 
   const formatValue = (value: string) => {
@@ -288,7 +342,7 @@ export default function NewAssetPage() {
     const newAsset = {
       id: Date.now(), // Simple ID generation
       name: formData.name,
-      number: formData.number || generateAssetNumber(formData.category),
+      number: formData.number || generateAssetNumber(formData.category, formData.location, formData.lga),
       location: formData.location,
       category: formData.category === 'Healthcare' ? 'Healthcare Facilities' : 
                 formData.category === 'Education' ? 'Educational Institutions' : 
@@ -448,15 +502,71 @@ export default function NewAssetPage() {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Asset Number *
                 </label>
+                <div className="flex space-x-2">
                 <input
                   type="text"
                   name="number"
                   value={formData.number}
                   onChange={handleInputChange}
-                  placeholder="e.g., LAG-001"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="e.g., #LAS-HLT-001-IKJ"
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (formData.category) {
+                        const generatedNumber = generateAssetNumber(formData.category, formData.location, formData.lga)
+                        setFormData(prev => ({ ...prev, number: generatedNumber }))
+                      }
+                    }}
+                    disabled={!formData.category}
+                    className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium transition-colors"
+                    title="Generate asset number based on category and location"
+                  >
+                    Generate
+                  </button>
+                </div>
+                {formData.category && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Format: #LAS-{(
+                      {
+                        'Healthcare': 'HLT',
+                        'Education': 'EDU', 
+                        'Government': 'GOV',
+                        'Infrastructure': 'INF',
+                        'Transportation': 'TRP',
+                        'Utilities': 'UTL',
+                        'Residential': 'RES',
+                        'Commercial': 'COM',
+                        'Recreation': 'REC',
+                        'Security': 'SEC',
+                        'Equipment': 'EQP'
+                      }[formData.category] || 'GEN'
+                    )}-XXX{formData.lga ? `-${({
+                      'Ikeja': 'IKJ',
+                      'Lagos Island': 'LGI', 
+                      'Lagos Mainland': 'LGM',
+                      'Surulere': 'SUR',
+                      'Ojo': 'OJO',
+                      'Alimosho': 'ALM',
+                      'Agege': 'AGE',
+                      'Ifako-Ijaiye': 'IFJ',
+                      'Shomolu': 'SHM',
+                      'Mushin': 'MSH',
+                      'Oshodi-Isolo': 'OSH',
+                      'Kosofe': 'KOS',
+                      'Ikorodu': 'IKR',
+                      'Epe': 'EPE',
+                      'Badagry': 'BAD',
+                      'Ajeromi-Ifelodun': 'AJR',
+                      'Amuwo-Odofin': 'AMW',
+                      'Apapa': 'APA',
+                      'Eti-Osa': 'ETO',
+                      'Ibeju-Lekki': 'IBL'
+                    }[formData.lga] || formData.lga.substring(0, 3).toUpperCase())}` : ''}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -593,19 +703,143 @@ export default function NewAssetPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Asset Type *
               </label>
-              <input
-                type="text"
+              <select
                 name="type"
                 value={formData.type}
                 onChange={handleInputChange}
-                placeholder="e.g., Healthcare Facility, Government Building, etc."
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
-              />
+              >
+                <option value="">Select Asset Type</option>
+                {formData.category === "Healthcare" && (
+                  <>
+                    <option value="Hospital Building">Hospital Building</option>
+                    <option value="Clinic Building">Clinic Building</option>
+                    <option value="Medical Center">Medical Center</option>
+                    <option value="Healthcare Facility">Healthcare Facility</option>
+                    <option value="Maternity Home">Maternity Home</option>
+                    <option value="Psychiatric Facility">Psychiatric Facility</option>
+                    <option value="Laboratory Building">Laboratory Building</option>
+                  </>
+                )}
+                {formData.category === "Education" && (
+                  <>
+                    <option value="School Building">School Building</option>
+                    <option value="University Building">University Building</option>
+                    <option value="College Building">College Building</option>
+                    <option value="Library Building">Library Building</option>
+                    <option value="Laboratory Building">Laboratory Building</option>
+                    <option value="Hostel Building">Hostel Building</option>
+                    <option value="Administrative Block">Administrative Block</option>
+                  </>
+                )}
+                {formData.category === "Government" && (
+                  <>
+                    <option value="Government Building">Government Building</option>
+                    <option value="Administrative Complex">Administrative Complex</option>
+                    <option value="Ministry Building">Ministry Building</option>
+                    <option value="Court Building">Court Building</option>
+                    <option value="Assembly Building">Assembly Building</option>
+                    <option value="Office Complex">Office Complex</option>
+                    <option value="Secretariat Building">Secretariat Building</option>
+                  </>
+                )}
+                {formData.category === "Infrastructure" && (
+                  <>
+                    <option value="Bridge Structure">Bridge Structure</option>
+                    <option value="Road Infrastructure">Road Infrastructure</option>
+                    <option value="Water Treatment Plant">Water Treatment Plant</option>
+                    <option value="Power Plant">Power Plant</option>
+                    <option value="Drainage System">Drainage System</option>
+                    <option value="Waste Management Facility">Waste Management Facility</option>
+                    <option value="Telecommunications Infrastructure">Telecommunications Infrastructure</option>
+                  </>
+                )}
+                {formData.category === "Transportation" && (
+                  <>
+                    <option value="Bus Terminal">Bus Terminal</option>
+                    <option value="Ferry Terminal">Ferry Terminal</option>
+                    <option value="Railway Station">Railway Station</option>
+                    <option value="Airport Terminal">Airport Terminal</option>
+                    <option value="Parking Facility">Parking Facility</option>
+                    <option value="Transport Hub">Transport Hub</option>
+                    <option value="Vehicle Fleet">Vehicle Fleet</option>
+                  </>
+                )}
+                {formData.category === "Utilities" && (
+                  <>
+                    <option value="Water Supply System">Water Supply System</option>
+                    <option value="Sewage Treatment Plant">Sewage Treatment Plant</option>
+                    <option value="Power Distribution System">Power Distribution System</option>
+                    <option value="Gas Distribution Network">Gas Distribution Network</option>
+                    <option value="Street Lighting System">Street Lighting System</option>
+                    <option value="Waste Collection Point">Waste Collection Point</option>
+                    <option value="Public Toilet Facility">Public Toilet Facility</option>
+                  </>
+                )}
+                {formData.category === "Residential" && (
+                  <>
+                    <option value="Housing Estate">Housing Estate</option>
+                    <option value="Staff Quarters">Staff Quarters</option>
+                    <option value="Public Housing">Public Housing</option>
+                    <option value="Residential Complex">Residential Complex</option>
+                    <option value="Student Hostel">Student Hostel</option>
+                    <option value="Senior Housing">Senior Housing</option>
+                    <option value="Temporary Shelter">Temporary Shelter</option>
+                  </>
+                )}
+                {formData.category === "Commercial" && (
+                  <>
+                    <option value="Market Building">Market Building</option>
+                    <option value="Shopping Center">Shopping Center</option>
+                    <option value="Business Complex">Business Complex</option>
+                    <option value="Industrial Estate">Industrial Estate</option>
+                    <option value="Trade Center">Trade Center</option>
+                    <option value="Exhibition Hall">Exhibition Hall</option>
+                    <option value="Commercial Building">Commercial Building</option>
+                  </>
+                )}
+                {formData.category === "Recreation" && (
+                  <>
+                    <option value="Park Facility">Park Facility</option>
+                    <option value="Sports Complex">Sports Complex</option>
+                    <option value="Stadium">Stadium</option>
+                    <option value="Recreation Center">Recreation Center</option>
+                    <option value="Cultural Center">Cultural Center</option>
+                    <option value="Museum Building">Museum Building</option>
+                    <option value="Art Gallery">Art Gallery</option>
+                  </>
+                )}
+                {formData.category === "Security" && (
+                  <>
+                    <option value="Police Station">Police Station</option>
+                    <option value="Fire Station">Fire Station</option>
+                    <option value="Security Post">Security Post</option>
+                    <option value="Emergency Center">Emergency Center</option>
+                    <option value="Correctional Facility">Correctional Facility</option>
+                    <option value="Border Post">Border Post</option>
+                    <option value="CCTV System">CCTV System</option>
+                  </>
+                )}
+                {formData.category === "Equipment" && (
+                  <>
+                    <option value="Medical Equipment">Medical Equipment</option>
+                    <option value="Office Equipment">Office Equipment</option>
+                    <option value="Construction Equipment">Construction Equipment</option>
+                    <option value="IT Equipment">IT Equipment</option>
+                    <option value="Laboratory Equipment">Laboratory Equipment</option>
+                    <option value="Security Equipment">Security Equipment</option>
+                    <option value="Generator Equipment">Generator Equipment</option>
+                  </>
+                )}
+                {!formData.category && (
+                  <option value="" disabled>Please select a category first</option>
+                )}
+              </select>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Specific type of asset (e.g., &quot;Healthcare Facility&quot; for hospitals, &quot;Government Building&quot; for offices)
+                Specific type of asset based on the selected category
               </p>
-            </div>
+          </div>
 
             {/* Additional Basic Fields */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
@@ -1416,15 +1650,45 @@ export default function NewAssetPage() {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Department *
                 </label>
-                <input
-                  type="text"
+                <select
                   name="department"
                   value={formData.department}
                   onChange={handleInputChange}
-                  placeholder="Responsible department"
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
-                />
+                >
+                  <option value="">Select Department</option>
+                  <option value="Ministry of Health">Ministry of Health</option>
+                  <option value="Ministry of Education">Ministry of Education</option>
+                  <option value="Ministry of Works & Infrastructure">Ministry of Works & Infrastructure</option>
+                  <option value="Ministry of Transportation">Ministry of Transportation</option>
+                  <option value="Ministry of Environment">Ministry of Environment</option>
+                  <option value="Ministry of Housing">Ministry of Housing</option>
+                  <option value="Ministry of Agriculture">Ministry of Agriculture</option>
+                  <option value="Ministry of Commerce & Industry">Ministry of Commerce & Industry</option>
+                  <option value="Ministry of Justice">Ministry of Justice</option>
+                  <option value="Ministry of Finance">Ministry of Finance</option>
+                  <option value="Ministry of Energy & Mineral Resources">Ministry of Energy & Mineral Resources</option>
+                  <option value="Ministry of Science & Technology">Ministry of Science & Technology</option>
+                  <option value="Ministry of Tourism, Arts & Culture">Ministry of Tourism, Arts & Culture</option>
+                  <option value="Ministry of Youth & Sports">Ministry of Youth & Sports</option>
+                  <option value="Ministry of Women Affairs & Poverty Alleviation">Ministry of Women Affairs & Poverty Alleviation</option>
+                  <option value="Lagos State Government">Lagos State Government</option>
+                  <option value="Lagos State Police Command">Lagos State Police Command</option>
+                  <option value="Lagos State Fire Service">Lagos State Fire Service</option>
+                  <option value="Lagos State Security Trust Fund">Lagos State Security Trust Fund</option>
+                  <option value="Lagos State Emergency Management Agency">Lagos State Emergency Management Agency</option>
+                  <option value="Federal Airports Authority of Nigeria">Federal Airports Authority of Nigeria</option>
+                  <option value="Federal Ministry of Interior">Federal Ministry of Interior</option>
+                  <option value="Lagos State Water Corporation">Lagos State Water Corporation</option>
+                  <option value="Lagos State Waste Management Authority">Lagos State Waste Management Authority</option>
+                  <option value="Lagos Metropolitan Area Transport Authority">Lagos Metropolitan Area Transport Authority</option>
+                  <option value="Lagos State Resident Registration Agency">Lagos State Resident Registration Agency</option>
+                  <option value="Lagos State Internal Revenue Service">Lagos State Internal Revenue Service</option>
+                  <option value="Lagos State Public Works Corporation">Lagos State Public Works Corporation</option>
+                  <option value="Lagos State Building Control Agency">Lagos State Building Control Agency</option>
+                  <option value="Lagos State Physical Planning Permit Authority">Lagos State Physical Planning Permit Authority</option>
+                </select>
         </div>
       </div>
           </div>
@@ -1705,7 +1969,7 @@ export default function NewAssetPage() {
                       placeholder="Enter floors"
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Total Rooms (Count)</label>
                     <input
@@ -1716,7 +1980,7 @@ export default function NewAssetPage() {
                       placeholder="Enter total rooms"
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Total Windows (Count)</label>
                     <input
@@ -1727,7 +1991,7 @@ export default function NewAssetPage() {
                       placeholder="Enter total windows"
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Total Doors (Count)</label>
                     <input
@@ -1773,7 +2037,7 @@ export default function NewAssetPage() {
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
-            </div>
+              </div>
 
               {/* Facilities */}
               <div className="mb-8">
@@ -1789,7 +2053,7 @@ export default function NewAssetPage() {
                       placeholder="Enter parking spaces"
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Restrooms</label>
                     <input
@@ -1800,7 +2064,7 @@ export default function NewAssetPage() {
                       placeholder="Enter restrooms"
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Kitchens</label>
                     <input
@@ -1834,14 +2098,14 @@ export default function NewAssetPage() {
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
-            </div>
-          </div>
+                </div>
+              </div>
 
               {/* Systems */}
               <div className="mb-8">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 border-l-4 border-purple-600 pl-3">Systems</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">HVAC System</label>
                     <select
                       name="hvacSystem"
@@ -1855,7 +2119,7 @@ export default function NewAssetPage() {
                       <option value="Window Units">Window Units</option>
                       <option value="None">None</option>
                     </select>
-              </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Electrical System</label>
                     <select
@@ -1869,7 +2133,7 @@ export default function NewAssetPage() {
                       <option value="110V/220V Mixed">110V/220V Mixed</option>
                       <option value="Industrial 3-Phase">Industrial 3-Phase</option>
                     </select>
-            </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Plumbing System</label>
                     <select
@@ -1883,7 +2147,7 @@ export default function NewAssetPage() {
                       <option value="Well Water">Well Water</option>
                       <option value="Mixed System">Mixed System</option>
                     </select>
-          </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Security System</label>
                     <select
@@ -1898,7 +2162,7 @@ export default function NewAssetPage() {
                       <option value="Basic Alarms">Basic Alarms</option>
                       <option value="None">None</option>
                     </select>
-                </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fire System</label>
                     <select
@@ -1914,7 +2178,7 @@ export default function NewAssetPage() {
                     </select>
                   </div>
                 </div>
-          </div>
+              </div>
 
               {/* Accessibility */}
               <div className="mb-8">
@@ -1933,7 +2197,7 @@ export default function NewAssetPage() {
                       <option value="Partial">Partial</option>
                       <option value="No">No</option>
                     </select>
-          </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Elevator Access</label>
                     <select
@@ -1946,7 +2210,7 @@ export default function NewAssetPage() {
                       <option value="Yes">Yes</option>
                       <option value="No">No</option>
                     </select>
-        </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ramps</label>
                     <input
@@ -1957,7 +2221,7 @@ export default function NewAssetPage() {
                       placeholder="Enter ramps"
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Accessible Restrooms</label>
                     <input
@@ -1970,7 +2234,7 @@ export default function NewAssetPage() {
                     />
                   </div>
                 </div>
-            </div>
+              </div>
 
               {/* Safety */}
               <div className="mb-8">
@@ -1986,7 +2250,7 @@ export default function NewAssetPage() {
                       placeholder="Enter fire extinguishers"
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Smoke Detectors</label>
                     <input
@@ -1997,7 +2261,7 @@ export default function NewAssetPage() {
                       placeholder="Enter smoke detectors"
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Emergency Exits</label>
                     <input
@@ -2008,7 +2272,7 @@ export default function NewAssetPage() {
                       placeholder="Enter emergency exits"
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">First Aid Stations</label>
                     <input
@@ -2019,7 +2283,7 @@ export default function NewAssetPage() {
                       placeholder="Enter first aid stations"
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-            </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2046,12 +2310,12 @@ export default function NewAssetPage() {
                   ← Previous
                 </button>
               )}
-            </div>
-            
+          </div>
+
             <div className="flex space-x-4">
               {currentStep < steps.length ? (
-                <button
-                  type="button"
+            <button
+              type="button"
                   onClick={nextStep}
                   disabled={!validateCurrentStep()}
                   className={`px-6 py-2 rounded-lg font-medium transition-colors ${
@@ -2061,19 +2325,19 @@ export default function NewAssetPage() {
                   }`}
                 >
                   Next →
-                </button>
+            </button>
               ) : (
-                <button
-                  type="submit"
+            <button
+              type="submit"
                   disabled={!validateCurrentStep()}
                   className={`px-6 py-2 rounded-lg font-medium transition-colors ${
                     validateCurrentStep()
                       ? 'bg-green-600 hover:bg-green-700 text-white'
                       : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                   }`}
-                >
-                  Create Asset
-                </button>
+            >
+              Create Asset
+            </button>
               )}
             </div>
           </div>

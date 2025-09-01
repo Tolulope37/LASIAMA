@@ -2,8 +2,32 @@
 
 import { useState } from "react"
 
+interface User {
+  id: number
+  name: string
+  email: string
+  role: string
+  department: string
+  status: string
+  lastLogin: string
+  avatar: string
+  permissions?: string[]
+  accessExpiry?: string
+  createdDate?: string
+  activities?: Activity[]
+}
+
+interface Activity {
+  id: string
+  action: string
+  description: string
+  timestamp: string
+  ipAddress?: string
+  location?: string
+}
+
 export default function UsersPage() {
-  const [users] = useState([
+  const [users, setUsers] = useState<User[]>([
     {
       id: 1,
       name: "Admin User",
@@ -11,8 +35,15 @@ export default function UsersPage() {
       role: "Super Admin",
       department: "IT Administration",
       status: "Active",
-      lastLogin: "2024-01-15 09:30",
-      avatar: "AU"
+      lastLogin: "15/01/2024 09:30",
+      avatar: "AU",
+      permissions: ["all"],
+      createdDate: "01/01/2023",
+      activities: [
+        { id: "1", action: "Login", description: "Logged into the system", timestamp: "15/01/2024 09:30", ipAddress: "192.168.1.1", location: "Lagos, Nigeria" },
+        { id: "2", action: "Create Asset", description: "Created new asset: Lagos General Hospital", timestamp: "15/01/2024 09:45", ipAddress: "192.168.1.1", location: "Lagos, Nigeria" },
+        { id: "3", action: "Update User", description: "Updated user permissions for John Manager", timestamp: "14/01/2024 16:20", ipAddress: "192.168.1.1", location: "Lagos, Nigeria" }
+      ]
     },
     {
       id: 2,
@@ -21,8 +52,15 @@ export default function UsersPage() {
       role: "Manager",
       department: "Asset Management",
       status: "Active",
-      lastLogin: "2024-01-14 14:22",
-      avatar: "JM"
+      lastLogin: "14/01/2024 14:22",
+      avatar: "JM",
+      permissions: ["assets.view", "assets.edit", "maintenance.view", "reports.view"],
+      createdDate: "15/06/2023",
+      activities: [
+        { id: "1", action: "Login", description: "Logged into the system", timestamp: "14/01/2024 14:22", ipAddress: "192.168.1.5", location: "Lagos, Nigeria" },
+        { id: "2", action: "View Asset", description: "Viewed Third Mainland Bridge details", timestamp: "14/01/2024 14:30", ipAddress: "192.168.1.5", location: "Lagos, Nigeria" },
+        { id: "3", action: "Schedule Maintenance", description: "Scheduled maintenance for Lagos General Hospital", timestamp: "14/01/2024 15:45", ipAddress: "192.168.1.5", location: "Lagos, Nigeria" }
+      ]
     },
     {
       id: 3,
@@ -31,19 +69,10 @@ export default function UsersPage() {
       role: "Officer",
       department: "Field Operations",
       status: "Active",
-      lastLogin: "2024-01-13 11:15",
+      lastLogin: "13/01/2024 11:15",
       avatar: "SO"
     },
-    {
-      id: 4,
-      name: "Mike Tenant",
-      email: "tenant@example.com",
-      role: "Tenant",
-      department: "External",
-      status: "Active",
-      lastLogin: "2024-01-12 16:45",
-      avatar: "MT"
-    },
+
     {
       id: 5,
       name: "Lisa Inactive",
@@ -51,10 +80,89 @@ export default function UsersPage() {
       role: "Officer",
       department: "Maintenance",
       status: "Inactive",
-      lastLogin: "2023-12-20 10:30",
+      lastLogin: "20/12/2023 10:30",
       avatar: "LI"
     }
   ])
+
+  // Modal states
+  const [showAddUserModal, setShowAddUserModal] = useState(false)
+  const [showUserDetailsModal, setShowUserDetailsModal] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  
+  // New user form data
+  const [newUser, setNewUser] = useState({
+    name: '',
+    email: '',
+    role: '',
+    department: '',
+    permissions: [] as string[],
+    temporaryAccess: false,
+    accessExpiry: ''
+  })
+
+  const availablePermissions = [
+    { id: 'assets.view', label: 'View Assets', category: 'Assets' },
+    { id: 'assets.create', label: 'Create Assets', category: 'Assets' },
+    { id: 'assets.edit', label: 'Edit Assets', category: 'Assets' },
+    { id: 'assets.delete', label: 'Delete Assets', category: 'Assets' },
+    { id: 'maintenance.view', label: 'View Maintenance', category: 'Maintenance' },
+    { id: 'maintenance.create', label: 'Create Maintenance', category: 'Maintenance' },
+    { id: 'maintenance.edit', label: 'Edit Maintenance', category: 'Maintenance' },
+    { id: 'projects.view', label: 'View Projects', category: 'Projects' },
+    { id: 'projects.create', label: 'Create Projects', category: 'Projects' },
+    { id: 'projects.edit', label: 'Edit Projects', category: 'Projects' },
+    { id: 'reports.view', label: 'View Reports', category: 'Reports' },
+    { id: 'reports.generate', label: 'Generate Reports', category: 'Reports' },
+    { id: 'users.view', label: 'View Users', category: 'User Management' },
+    { id: 'users.create', label: 'Create Users', category: 'User Management' },
+    { id: 'users.edit', label: 'Edit Users', category: 'User Management' },
+    { id: 'vault.view', label: 'View Vault', category: 'Vault' },
+    { id: 'vault.upload', label: 'Upload Files', category: 'Vault' },
+    { id: 'vault.manage', label: 'Manage Folders', category: 'Vault' }
+  ]
+
+  const handleAddUser = () => {
+    const user: User = {
+      id: Math.max(...users.map(u => u.id)) + 1,
+      name: newUser.name,
+      email: newUser.email,
+      role: newUser.role,
+      department: newUser.department,
+      status: 'Active',
+      lastLogin: 'Never',
+      avatar: newUser.name.split(' ').map(n => n[0]).join('').toUpperCase(),
+      permissions: newUser.permissions,
+      accessExpiry: newUser.temporaryAccess ? newUser.accessExpiry : undefined,
+      createdDate: new Date().toLocaleDateString('en-GB'),
+      activities: [
+        {
+          id: '1',
+          action: 'Account Created',
+          description: 'User account was created',
+          timestamp: new Date().toLocaleDateString('en-GB') + ' ' + new Date().toLocaleTimeString('en-GB', { hour12: false }),
+          location: 'Lagos, Nigeria'
+        }
+      ]
+    }
+    
+    setUsers([...users, user])
+    setShowAddUserModal(false)
+    setNewUser({
+      name: '',
+      email: '',
+      role: '',
+      department: '',
+      permissions: [],
+      temporaryAccess: false,
+      accessExpiry: ''
+    })
+  }
+
+  const handleViewUser = (user: User) => {
+    setSelectedUser(user)
+    setShowUserDetailsModal(true)
+  }
 
   const getRoleColor = (role: string) => {
     switch (role) {
@@ -87,7 +195,10 @@ export default function UsersPage() {
               <p className="text-gray-600 dark:text-gray-400">Manage users, roles, and permissions</p>
             </div>
             <div className="flex items-center space-x-3">
-              <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+              <button 
+                onClick={() => setShowAddUserModal(true)}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
                 + Add User
               </button>
             </div>
@@ -165,7 +276,6 @@ export default function UsersPage() {
                 <option>Admin</option>
                 <option>Manager</option>
                 <option>Officer</option>
-                <option>Tenant</option>
               </select>
               <select className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 <option>All Status</option>
@@ -217,7 +327,11 @@ export default function UsersPage() {
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {users.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                  <tr 
+                    key={user.id} 
+                    onClick={() => handleViewUser(user)}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
@@ -306,6 +420,301 @@ export default function UsersPage() {
           </div>
         </div>
       </div>
+
+      {/* Add User Modal */}
+      {showAddUserModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Add New User</h2>
+                <button 
+                  onClick={() => setShowAddUserModal(false)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={newUser.name}
+                    onChange={(e) => setNewUser({...newUser, name: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter full name"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    value={newUser.email}
+                    onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="user@lasiama.lg.ng"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Role *
+                  </label>
+                  <select
+                    value={newUser.role}
+                    onChange={(e) => setNewUser({...newUser, role: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select Role</option>
+                    <option value="Super Admin">Super Admin</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Officer">Officer</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Department *
+                  </label>
+                  <select
+                    value={newUser.department}
+                    onChange={(e) => setNewUser({...newUser, department: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select Department</option>
+                    <option value="IT Administration">IT Administration</option>
+                    <option value="Asset Management">Asset Management</option>
+                    <option value="Field Operations">Field Operations</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Legal">Legal</option>
+                    <option value="External">External</option>
+                  </select>
+                </div>
+              </div>
+              
+              {/* Temporary Access */}
+              <div className="mb-6">
+                <div className="flex items-center mb-4">
+                  <input
+                    type="checkbox"
+                    id="temporaryAccess"
+                    checked={newUser.temporaryAccess}
+                    onChange={(e) => setNewUser({...newUser, temporaryAccess: e.target.checked})}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label htmlFor="temporaryAccess" className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Grant Temporary Access
+                  </label>
+                </div>
+                
+                {newUser.temporaryAccess && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Access Expiry Date
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={newUser.accessExpiry}
+                      onChange={(e) => setNewUser({...newUser, accessExpiry: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                )}
+              </div>
+              
+              {/* Permissions */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Permissions</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Object.entries(
+                    availablePermissions.reduce((acc, perm) => {
+                      if (!acc[perm.category]) acc[perm.category] = []
+                      acc[perm.category].push(perm)
+                      return acc
+                    }, {} as Record<string, typeof availablePermissions>)
+                  ).map(([category, perms]) => (
+                    <div key={category} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                      <h4 className="font-medium text-gray-900 dark:text-white mb-2">{category}</h4>
+                      <div className="space-y-2">
+                        {perms.map((perm) => (
+                          <div key={perm.id} className="flex items-center">
+                            <input
+                              type="checkbox"
+                              id={perm.id}
+                              checked={newUser.permissions.includes(perm.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setNewUser({...newUser, permissions: [...newUser.permissions, perm.id]})
+                                } else {
+                                  setNewUser({...newUser, permissions: newUser.permissions.filter(p => p !== perm.id)})
+                                }
+                              }}
+                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            <label htmlFor={perm.id} className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                              {perm.label}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-end space-x-4">
+                <button
+                  onClick={() => setShowAddUserModal(false)}
+                  className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddUser}
+                  disabled={!newUser.name || !newUser.email || !newUser.role || !newUser.department}
+                  className="px-6 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
+                >
+                  Create User
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Details Modal */}
+      {showUserDetailsModal && selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="w-12 h-12 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center mr-4">
+                    <span className="text-lg font-medium text-gray-700 dark:text-gray-200">
+                      {selectedUser.avatar}
+                    </span>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">{selectedUser.name}</h2>
+                    <p className="text-gray-600 dark:text-gray-400">{selectedUser.email}</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setShowUserDetailsModal(false)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              {/* User Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Role</label>
+                    <p className="mt-1">
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${getRoleColor(selectedUser.role)}`}>
+                        {selectedUser.role}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Department</label>
+                    <p className="mt-1 text-gray-900 dark:text-white">{selectedUser.department}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Status</label>
+                    <p className="mt-1">
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(selectedUser.status)}`}>
+                        {selectedUser.status}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Last Login</label>
+                    <p className="mt-1 text-gray-900 dark:text-white">{selectedUser.lastLogin}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Account Created</label>
+                    <p className="mt-1 text-gray-900 dark:text-white">{selectedUser.createdDate || 'N/A'}</p>
+                  </div>
+                  {selectedUser.accessExpiry && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Access Expires</label>
+                      <p className="mt-1 text-red-600 dark:text-red-400 font-medium">{selectedUser.accessExpiry}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Permissions */}
+              {selectedUser.permissions && (
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Permissions</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                    {selectedUser.permissions.map((permission) => (
+                      <span key={permission} className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm">
+                        {availablePermissions.find(p => p.id === permission)?.label || permission}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Activity Log */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Activity</h3>
+                <div className="space-y-4">
+                  {selectedUser.activities?.map((activity) => (
+                    <div key={activity.id} className="flex items-start space-x-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
+                        <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-sm font-medium text-gray-900 dark:text-white">{activity.action}</h4>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">{activity.timestamp}</span>
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{activity.description}</p>
+                        {(activity.ipAddress || activity.location) && (
+                          <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            {activity.ipAddress && <span>IP: {activity.ipAddress}</span>}
+                            {activity.location && <span>Location: {activity.location}</span>}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )) || (
+                    <p className="text-gray-500 dark:text-gray-400 text-center py-4">No activity recorded yet.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
