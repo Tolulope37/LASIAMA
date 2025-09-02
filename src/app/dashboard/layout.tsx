@@ -8,9 +8,20 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [expandedSections, setExpandedSections] = useState<string[]>([])
 
-  const navigationItems = [
+  const toggleSection = (sectionName: string) => {
+    setExpandedSections(prev => 
+      prev.includes(sectionName) 
+        ? prev.filter(s => s !== sectionName)
+        : [...prev, sectionName]
+    )
+  }
+
+  const navigationSections = [
+    // Main Navigation Items
     {
+      type: 'item',
       name: 'Dashboard',
       href: '/dashboard',
       icon: (
@@ -20,6 +31,7 @@ export default function DashboardLayout({
       ),
     },
     {
+      type: 'item',
       name: 'Assets',
       href: '/dashboard/assets',
       icon: (
@@ -28,7 +40,31 @@ export default function DashboardLayout({
         </svg>
       ),
     },
+    // Item Management Section
     {
+      type: 'section',
+      name: 'Item Management',
+      id: 'item-management',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 1v6m6-6v6" />
+        </svg>
+      ),
+      items: [
+        { name: 'Category Master', href: '/dashboard/item-management/category-master' },
+        { name: 'Unit Master', href: '/dashboard/item-management/unit-master' },
+        { name: 'Item Master', href: '/dashboard/item-management/item-master' },
+        { name: 'Item Attribute Master', href: '/dashboard/item-management/item-attribute-master' },
+        { name: 'Item Assignment', href: '/dashboard/item-management/item-assignment' },
+        { name: 'Item Allocation', href: '/dashboard/item-management/item-allocation' },
+        { name: 'Item Transfer', href: '/dashboard/item-management/item-transfer' },
+        { name: 'Item Administration', href: '/dashboard/item-management/item-administration' },
+        { name: 'Reports', href: '/dashboard/item-management/reports' }
+      ]
+    },
+    // Continue with other items
+    {
+      type: 'item',
       name: 'Maintenance & Faults',
       href: '/dashboard/maintenance',
       icon: (
@@ -38,7 +74,37 @@ export default function DashboardLayout({
         </svg>
       ),
     },
+    // Contract Management Section
     {
+      type: 'section',
+      name: 'Contract Management',
+      id: 'contract-management',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      ),
+      items: [
+        { name: 'Contractor Master', href: '/dashboard/contract-management/contractor-master' },
+        { name: 'Contract Details', href: '/dashboard/contract-management/contract-details' },
+        { name: 'Contract Visits', href: '/dashboard/contract-management/contract-visits' },
+        { name: 'Contract Payment Details', href: '/dashboard/contract-management/contract-payment-details' },
+        { name: 'Reports', href: '/dashboard/contract-management/reports' }
+      ]
+    },
+    // Continue with remaining items
+    {
+      type: 'item',
+      name: 'Reports',
+      href: '/dashboard/reports',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      ),
+    },
+    {
+      type: 'item',
       name: 'Map View',
       href: '/dashboard/map',
       icon: (
@@ -49,15 +115,7 @@ export default function DashboardLayout({
       ),
     },
     {
-      name: 'Reports',
-      href: '/dashboard/reports',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-      ),
-    },
-    {
+      type: 'item',
       name: 'Vault',
       href: '/dashboard/vault',
       icon: (
@@ -68,6 +126,7 @@ export default function DashboardLayout({
       ),
     },
     {
+      type: 'item',
       name: 'Calendar',
       href: '/dashboard/calendar',
       icon: (
@@ -77,6 +136,7 @@ export default function DashboardLayout({
       ),
     },
     {
+      type: 'item',
       name: 'Users',
       href: '/dashboard/users',
       icon: (
@@ -86,6 +146,7 @@ export default function DashboardLayout({
       ),
     },
     {
+      type: 'item',
       name: 'Settings',
       href: '/dashboard/settings',
       icon: (
@@ -119,16 +180,59 @@ export default function DashboardLayout({
 
         {/* Navigation */}
         <nav className="flex-1 px-2 py-4 space-y-1">
-          {navigationItems.map((item) => (
-            <a
-              key={item.name}
-              href={item.href}
-              className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
-            >
-              <span className="mr-3">{item.icon}</span>
-              {sidebarOpen && <span>{item.name}</span>}
-            </a>
-          ))}
+          {navigationSections.map((section) => {
+            if (section.type === 'item') {
+              return (
+                <a
+                  key={section.name}
+                  href={section.href}
+                  className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+                >
+                  <span className="mr-3">{section.icon}</span>
+                  {sidebarOpen && <span>{section.name}</span>}
+                </a>
+              )
+            } else if (section.type === 'section') {
+              const isExpanded = expandedSections.includes(section.id)
+              return (
+                <div key={section.name}>
+                  <button
+                    onClick={() => toggleSection(section.id)}
+                    className="group flex items-center justify-between w-full px-2 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+                  >
+                    <div className="flex items-center">
+                      <span className="mr-3">{section.icon}</span>
+                      {sidebarOpen && <span>{section.name}</span>}
+                    </div>
+                    {sidebarOpen && (
+                      <svg
+                        className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    )}
+                  </button>
+                  {isExpanded && sidebarOpen && (
+                    <div className="ml-6 mt-1 space-y-1">
+                      {section.items.map((item) => (
+                        <a
+                          key={item.name}
+                          href={item.href}
+                          className="block px-2 py-1 text-sm text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-colors"
+                        >
+                          {item.name}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            }
+            return null
+          })}
         </nav>
 
         {/* User Profile */}
