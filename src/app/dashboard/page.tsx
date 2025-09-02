@@ -39,6 +39,9 @@ export default function Dashboard() {
       case 'maintenance':
         router.push('/dashboard/maintenance')
         break
+      case 'calendar':
+        router.push('/dashboard/calendar')
+        break
       case 'reports':
         router.push('/dashboard/reports')
         break
@@ -212,6 +215,19 @@ export default function Dashboard() {
                 </div>
                 <span className="font-medium text-gray-900 dark:text-white">Maintenance</span>
                 <span className="text-xs text-gray-600 dark:text-gray-400 text-center">Schedule tasks</span>
+              </button>
+
+              <button
+                onClick={() => handleQuickAction('calendar')}
+                className="flex flex-col items-center p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg border border-cyan-200 dark:border-cyan-800 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 transition-colors group"
+              >
+                <div className="w-12 h-12 bg-cyan-600 rounded-lg flex items-center justify-center mb-3 group-hover:bg-cyan-700 transition-colors">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <span className="font-medium text-gray-900 dark:text-white">Calendar</span>
+                <span className="text-xs text-gray-600 dark:text-gray-400 text-center">Events & reminders</span>
               </button>
 
               <button
