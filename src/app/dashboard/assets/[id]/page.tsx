@@ -1,7 +1,466 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import ArchitecturalFloorPlan from "@/components/ArchitecturalFloorPlan"
+
+// Condition Assessment Component
+interface Assessment {
+  id: string
+  serial_number: number
+  location_type: string
+  floor_level: string
+  room_name: string
+  room_dimension: string
+  category: 'STRUCTURAL' | 'ELECTRICAL' | 'MECHANICAL'
+  item_type: string
+  sub_type: string
+  description: string
+  item_dimension: string
+  brand_name: string
+  total_qty: number
+  total_qty_not_functioning: number
+  damages_defects: string
+  damage_dimension: string
+  comments: string
+  assessor_name: string
+  assessment_date: string
+  status: 'good' | 'needs_attention' | 'needs_repair' | 'needs_replacement' | 'critical'
+  priority: 'low' | 'medium' | 'high' | 'critical'
+}
+
+const ConditionAssessmentContent = ({ assetId }: { assetId: string }) => {
+  const router = useRouter()
+  const [assessments, setAssessments] = useState<Assessment[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selectedCategory, setSelectedCategory] = useState('all')
+  const [selectedStatus, setSelectedStatus] = useState('all')
+  const [selectedFloor, setSelectedFloor] = useState('all')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  useEffect(() => {
+    // Load assessment data
+    fetch('/src/data/lasiama_assessments.json')
+      .then(res => res.json())
+      .then(data => {
+        setAssessments(data)
+        setLoading(false)
+      })
+      .catch(() => {
+        // Fallback sample data
+        const sampleData: Assessment[] = [
+          {
+            id: 'assessment_1',
+            serial_number: 1,
+            location_type: 'INTERNAL',
+            floor_level: 'FIRST FLOOR',
+            room_name: 'CORRIDOR TO CLASSROOM(BLOCK A)',
+            room_dimension: '52.4X1.8',
+            category: 'STRUCTURAL',
+            item_type: 'FLOOR',
+            sub_type: 'TERRAZO',
+            description: '1.2X1.2 TERRAZO',
+            item_dimension: '52.4X1.8',
+            brand_name: '',
+            total_qty: 1,
+            total_qty_not_functioning: 0,
+            damages_defects: '',
+            damage_dimension: '',
+            comments: 'REPLACE ALL THE RAILS',
+            assessor_name: 'EDOGA JAMES C',
+            assessment_date: '2025-09-03',
+            status: 'needs_attention',
+            priority: 'high'
+          },
+          {
+            id: 'assessment_2',
+            serial_number: 2,
+            location_type: 'INTERNAL',
+            floor_level: 'FIRST FLOOR',
+            room_name: 'V.P ACADEMICS 2/TOILET(BLOCK A)',
+            room_dimension: '3.5X3.4',
+            category: 'STRUCTURAL',
+            item_type: 'DOOR',
+            sub_type: 'PANELED',
+            description: 'FIBER MATERIAL',
+            item_dimension: '0.9X2.1',
+            brand_name: '',
+            total_qty: 1,
+            total_qty_not_functioning: 1,
+            damages_defects: 'BAD HANDLE',
+            damage_dimension: '',
+            comments: 'THE WALL FOR THE V.P ACADEMIC 2 IS CRACKED',
+            assessor_name: 'EDOGA JAMES C',
+            assessment_date: '2025-09-03',
+            status: 'needs_repair',
+            priority: 'high'
+          },
+          {
+            id: 'assessment_3',
+            serial_number: 3,
+            location_type: 'INTERNAL',
+            floor_level: 'FIRST FLOOR',
+            room_name: 'ICT ROOM(BLOCK A)',
+            room_dimension: '7.1X7.1',
+            category: 'ELECTRICAL',
+            item_type: 'LIGHT FIXTURES/FITTINGS',
+            sub_type: '18W ROUND SURFACE PANEL',
+            description: '18W ROUND SURFACE PANEL',
+            item_dimension: '',
+            brand_name: '',
+            total_qty: 4,
+            total_qty_not_functioning: 2,
+            damages_defects: 'NOT FUNCTIONING',
+            damage_dimension: '',
+            comments: 'REPLACE 2NOS OF 18W ROUND SURFACE PANEL LIGHTING FITTINGS',
+            assessor_name: 'OJERINDE ADEYEMI',
+            assessment_date: '2025-09-03',
+            status: 'needs_replacement',
+            priority: 'high'
+          },
+          {
+            id: 'assessment_4',
+            serial_number: 4,
+            location_type: 'INTERNAL',
+            floor_level: 'GROUND FLOOR',
+            room_name: 'GENERAL TOILET MALE(BLOCK F)',
+            room_dimension: '1.3X0.9',
+            category: 'MECHANICAL',
+            item_type: 'WATER CLOSET',
+            sub_type: 'TOILET TANK',
+            description: 'TOILET TANK',
+            item_dimension: '1.3X0.9',
+            brand_name: 'TWYFORD',
+            total_qty: 5,
+            total_qty_not_functioning: 5,
+            damages_defects: 'THE TOILET ROOF IS COMPLETELY BAD',
+            damage_dimension: '1.3X0.9',
+            comments: 'THE WHOLE TOILET NEEDS TO BE REPLACED(5).TAP,SINK AND CONNECTOR NEEDS TO BE REPLACED',
+            assessor_name: 'ATUGEGE S.E',
+            assessment_date: '2025-09-03',
+            status: 'critical',
+            priority: 'critical'
+          }
+        ]
+        setAssessments(sampleData)
+        setLoading(false)
+      })
+  }, [])
+
+  const getStatusColor = (status: Assessment['status']) => {
+    switch (status) {
+      case 'good': return 'text-green-600 bg-green-100 dark:bg-green-900 dark:text-green-300'
+      case 'needs_attention': return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900 dark:text-yellow-300'
+      case 'needs_repair': return 'text-orange-600 bg-orange-100 dark:bg-orange-900 dark:text-orange-300'
+      case 'needs_replacement': return 'text-red-600 bg-red-100 dark:bg-red-900 dark:text-red-300'
+      case 'critical': return 'text-red-800 bg-red-200 dark:bg-red-800 dark:text-red-100'
+      default: return 'text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300'
+    }
+  }
+
+  const getPriorityColor = (priority: Assessment['priority']) => {
+    switch (priority) {
+      case 'low': return 'text-green-600'
+      case 'medium': return 'text-yellow-600'
+      case 'high': return 'text-orange-600'
+      case 'critical': return 'text-red-600'
+      default: return 'text-gray-600'
+    }
+  }
+
+  const getCategoryIcon = (category: Assessment['category']) => {
+    switch (category) {
+      case 'STRUCTURAL': return '🏗️'
+      case 'ELECTRICAL': return '⚡'
+      case 'MECHANICAL': return '🔧'
+      default: return '📋'
+    }
+  }
+
+  // Filter assessments
+  const filteredAssessments = assessments.filter(assessment => {
+    const matchesCategory = selectedCategory === 'all' || assessment.category === selectedCategory
+    const matchesStatus = selectedStatus === 'all' || assessment.status === selectedStatus
+    const matchesFloor = selectedFloor === 'all' || assessment.floor_level === selectedFloor
+    const matchesSearch = !searchQuery || 
+      assessment.room_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      assessment.item_type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      assessment.damages_defects.toLowerCase().includes(searchQuery.toLowerCase())
+    
+    return matchesCategory && matchesStatus && matchesFloor && matchesSearch
+  })
+
+  // Get unique values for filters
+  const categories = Array.from(new Set(assessments.map(a => a.category)))
+  const statuses = Array.from(new Set(assessments.map(a => a.status)))
+  const floors = Array.from(new Set(assessments.map(a => a.floor_level)))
+
+  // Calculate statistics
+  const stats = {
+    total: assessments.length,
+    critical: assessments.filter(a => a.status === 'critical').length,
+    needsRepair: assessments.filter(a => a.status === 'needs_repair' || a.status === 'needs_replacement').length,
+    needsAttention: assessments.filter(a => a.status === 'needs_attention').length,
+    good: assessments.filter(a => a.status === 'good').length,
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading assessments...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white">Asset Condition Assessment</h3>
+          <p className="text-gray-600 dark:text-gray-400">Comprehensive building condition assessment based on Lasiama standards</p>
+        </div>
+        <div className="flex items-center space-x-3">
+          <button 
+            onClick={() => router.push('/dashboard/maintenance/assessments')}
+            className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors flex items-center space-x-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>View Maintenance Tasks</span>
+          </button>
+          <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center space-x-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span>Export Report</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center">
+            <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
+              <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Total Items</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center">
+            <div className="p-3 bg-red-100 dark:bg-red-900 rounded-lg">
+              <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Critical</p>
+              <p className="text-2xl font-bold text-red-600">{stats.critical}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center">
+            <div className="p-3 bg-orange-100 dark:bg-orange-900 rounded-lg">
+              <svg className="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Needs Repair</p>
+              <p className="text-2xl font-bold text-orange-600">{stats.needsRepair}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center">
+            <div className="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
+              <svg className="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Needs Attention</p>
+              <p className="text-2xl font-bold text-yellow-600">{stats.needsAttention}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center">
+            <div className="p-3 bg-green-100 dark:bg-green-900 rounded-lg">
+              <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Good Condition</p>
+              <p className="text-2xl font-bold text-green-600">{stats.good}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Filter Assessments</h4>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Search</label>
+            <input
+              type="text"
+              placeholder="Search rooms, items, or issues..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">All Categories</option>
+              {categories.map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">All Status</option>
+              {statuses.map(status => (
+                <option key={status} value={status}>{status.replace('_', ' ').toUpperCase()}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Floor</label>
+            <select
+              value={selectedFloor}
+              onChange={(e) => setSelectedFloor(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">All Floors</option>
+              {floors.map(floor => (
+                <option key={floor} value={floor}>{floor}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Assessment List */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Assessment Items ({filteredAssessments.length})
+          </h4>
+        </div>
+        
+        <div className="grid gap-4">
+          {filteredAssessments.map((assessment) => (
+            <div key={assessment.id} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <span className="text-2xl">{getCategoryIcon(assessment.category)}</span>
+                  <div>
+                    <h5 className="font-semibold text-gray-900 dark:text-white">{assessment.room_name}</h5>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{assessment.floor_level}</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(assessment.status)}`}>
+                    {assessment.status.replace('_', ' ').toUpperCase()}
+                  </span>
+                  <span className={`text-xs font-medium ${getPriorityColor(assessment.priority)}`}>
+                    {assessment.priority.toUpperCase()}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Item Details</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {assessment.category} - {assessment.item_type}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {assessment.sub_type} - {assessment.description}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Quantity</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Total: {assessment.total_qty} | Not Functioning: {assessment.total_qty_not_functioning}
+                  </p>
+                </div>
+              </div>
+              
+              {assessment.damages_defects && (
+                <div className="mb-4">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Damages/Defects</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{assessment.damages_defects}</p>
+                </div>
+              )}
+              
+              {assessment.comments && (
+                <div className="mb-4">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Comments</p>
+                  <p className="text-sm text-orange-600 dark:text-orange-400 font-medium">{assessment.comments}</p>
+                </div>
+              )}
+              
+              <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Assessed by: {assessment.assessor_name}
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Date: {assessment.assessment_date}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {filteredAssessments.length === 0 && (
+          <div className="text-center py-12">
+            <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            <p className="text-gray-600 dark:text-gray-400">No assessments found matching your criteria.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 // Function to generate comprehensive asset data for any asset
 const generateAssetData = (baseAsset: Record<string, unknown>) => {
@@ -1642,6 +2101,29 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
     location: 'all'
   })
 
+  // Room management state
+  const [selectedFloor, setSelectedFloor] = useState<number>(1)
+  const [showAddRoomModal, setShowAddRoomModal] = useState(false)
+  const [roomSearchQuery, setRoomSearchQuery] = useState('')
+  const [roomFilterType, setRoomFilterType] = useState('all')
+  const [roomFilterStatus, setRoomFilterStatus] = useState('all')
+  const [roomViewMode, setRoomViewMode] = useState<'list' | 'floorplan'>('list')
+  const [floorPlanMode, setFloorPlanMode] = useState<'building' | 'floor'>('building')
+  const [showTabDropdown, setShowTabDropdown] = useState(false)
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element
+      if (showTabDropdown && !target.closest('.tab-dropdown')) {
+        setShowTabDropdown(false)
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showTabDropdown])
+
   // Annual maintenance filter state
   const [selectedMaintenanceYear, setSelectedMaintenanceYear] = useState<string>('2025')
 
@@ -1809,6 +2291,248 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
   
   const asset = getAssetById(params.id)
   
+  // Room data for the asset (sample data for Lagos State General Hospital)
+  const floors = [
+    {
+      number: 1,
+      name: "Ground Floor",
+      totalArea: 2000,
+      totalRooms: 35,
+      dimensions: { width: 800, height: 600 },
+      rooms: [
+        {
+          id: "GF-001",
+          number: "GF-001",
+          name: "Main Reception",
+          floor: 1,
+          type: "Office" as const,
+          area: 150,
+          capacity: 50,
+          status: "Active" as const,
+          position: { x: 50, y: 50, width: 120, height: 80 },
+          equipment: [
+            { id: "eq-001", name: "Reception Desk", type: "Furniture", status: "Working" as const },
+            { id: "eq-002", name: "Computer Terminal", type: "IT Equipment", status: "Working" as const },
+            { id: "eq-003", name: "Printer", type: "Office Equipment", status: "Working" as const }
+          ],
+          occupancy: { current: 25, maximum: 50 },
+          lastInspection: "10/08/2025",
+          nextMaintenance: "10/11/2025"
+        },
+        {
+          id: "GF-002",
+          number: "GF-002",
+          name: "Emergency Department",
+          floor: 1,
+          type: "Emergency" as const,
+          area: 300,
+          capacity: 20,
+          status: "Active" as const,
+          position: { x: 190, y: 50, width: 150, height: 80 },
+          equipment: [
+            { id: "eq-004", name: "Defibrillator", type: "Medical Equipment", status: "Working" as const },
+            { id: "eq-005", name: "ECG Machine", type: "Medical Equipment", status: "Working" as const },
+            { id: "eq-006", name: "Emergency Trolley", type: "Medical Equipment", status: "Working" as const },
+            { id: "eq-007", name: "Oxygen Tank", type: "Medical Equipment", status: "Working" as const }
+          ],
+          occupancy: { current: 8, maximum: 20 },
+          lastInspection: "15/08/2025",
+          nextMaintenance: "15/09/2025"
+        },
+        {
+          id: "GF-003",
+          number: "GF-003",
+          name: "Laboratory 1",
+          floor: 1,
+          type: "Laboratory" as const,
+          area: 120,
+          capacity: 15,
+          status: "Active" as const,
+          position: { x: 360, y: 50, width: 120, height: 80 },
+          equipment: [
+            { id: "eq-008", name: "Microscope", type: "Medical Equipment", status: "Working" as const },
+            { id: "eq-009", name: "Centrifuge", type: "Medical Equipment", status: "Maintenance" as const },
+            { id: "eq-010", name: "Blood Analyzer", type: "Medical Equipment", status: "Working" as const }
+          ],
+          occupancy: { current: 10, maximum: 15 },
+          lastInspection: "12/08/2025",
+          nextMaintenance: "12/10/2025"
+        },
+        {
+          id: "GF-004",
+          number: "GF-004",
+          name: "Pharmacy",
+          floor: 1,
+          type: "Pharmacy" as const,
+          area: 80,
+          capacity: 10,
+          status: "Active" as const,
+          position: { x: 500, y: 50, width: 100, height: 80 },
+          equipment: [
+            { id: "eq-011", name: "Medicine Cabinet", type: "Storage", status: "Working" as const },
+            { id: "eq-012", name: "Refrigerator", type: "Storage", status: "Working" as const },
+            { id: "eq-013", name: "Dispensing Counter", type: "Furniture", status: "Working" as const }
+          ],
+          occupancy: { current: 5, maximum: 10 },
+          lastInspection: "08/08/2025",
+          nextMaintenance: "08/11/2025"
+        }
+      ]
+    },
+    {
+      number: 2,
+      name: "First Floor",
+      totalArea: 1800,
+      totalRooms: 30,
+      dimensions: { width: 800, height: 600 },
+      rooms: [
+        {
+          id: "FF-001",
+          number: "FF-001",
+          name: "General Ward A",
+          floor: 2,
+          type: "Ward" as const,
+          area: 200,
+          capacity: 20,
+          status: "Active" as const,
+          position: { x: 50, y: 50, width: 180, height: 120 },
+          equipment: [
+            { id: "eq-014", name: "Hospital Beds", type: "Medical Equipment", status: "Working" as const },
+            { id: "eq-015", name: "IV Stands", type: "Medical Equipment", status: "Working" as const },
+            { id: "eq-016", name: "Bedside Monitors", type: "Medical Equipment", status: "Working" as const }
+          ],
+          occupancy: { current: 18, maximum: 20 },
+          lastInspection: "14/08/2025",
+          nextMaintenance: "14/10/2025"
+        },
+        {
+          id: "FF-002",
+          number: "FF-002",
+          name: "General Ward B",
+          floor: 2,
+          type: "Ward" as const,
+          area: 200,
+          capacity: 20,
+          status: "Active" as const,
+          position: { x: 250, y: 50, width: 180, height: 120 },
+          equipment: [
+            { id: "eq-017", name: "Hospital Beds", type: "Medical Equipment", status: "Working" as const },
+            { id: "eq-018", name: "IV Stands", type: "Medical Equipment", status: "Working" as const },
+            { id: "eq-019", name: "Bedside Monitors", type: "Medical Equipment", status: "Maintenance" as const }
+          ],
+          occupancy: { current: 15, maximum: 20 },
+          lastInspection: "13/08/2025",
+          nextMaintenance: "13/10/2025"
+        },
+        {
+          id: "FF-003",
+          number: "FF-003",
+          name: "Consultation Room 1",
+          floor: 2,
+          type: "Consultation" as const,
+          area: 25,
+          capacity: 5,
+          status: "Active" as const,
+          position: { x: 450, y: 50, width: 80, height: 60 },
+          equipment: [
+            { id: "eq-020", name: "Examination Table", type: "Medical Equipment", status: "Working" as const },
+            { id: "eq-021", name: "Blood Pressure Monitor", type: "Medical Equipment", status: "Working" as const },
+            { id: "eq-022", name: "Stethoscope", type: "Medical Equipment", status: "Working" as const }
+          ],
+          occupancy: { current: 2, maximum: 5 },
+          lastInspection: "11/08/2025",
+          nextMaintenance: "11/11/2025"
+        }
+      ]
+    },
+    {
+      number: 3,
+      name: "Second Floor - Operating Theaters",
+      totalArea: 1500,
+      totalRooms: 12,
+      dimensions: { width: 800, height: 600 },
+      rooms: [
+        {
+          id: "SF-001",
+          number: "OT-001",
+          name: "Operating Theater 1",
+          floor: 3,
+          type: "Operating Theater" as const,
+          area: 150,
+          capacity: 10,
+          status: "Active" as const,
+          position: { x: 100, y: 100, width: 160, height: 100 },
+          equipment: [
+            { id: "eq-023", name: "Operating Table", type: "Medical Equipment", status: "Working" as const },
+            { id: "eq-024", name: "Anesthesia Machine", type: "Medical Equipment", status: "Working" as const },
+            { id: "eq-025", name: "Surgical Lights", type: "Medical Equipment", status: "Working" as const },
+            { id: "eq-026", name: "Heart Monitor", type: "Medical Equipment", status: "Working" as const }
+          ],
+          occupancy: { current: 6, maximum: 10 },
+          lastInspection: "16/08/2025",
+          nextMaintenance: "16/09/2025"
+        },
+        {
+          id: "SF-002",
+          number: "OT-002",
+          name: "Operating Theater 2",
+          floor: 3,
+          type: "Operating Theater" as const,
+          area: 150,
+          capacity: 10,
+          status: "Under Maintenance" as const,
+          position: { x: 300, y: 100, width: 160, height: 100 },
+          equipment: [
+            { id: "eq-027", name: "Operating Table", type: "Medical Equipment", status: "Maintenance" as const },
+            { id: "eq-028", name: "Anesthesia Machine", type: "Medical Equipment", status: "Working" as const },
+            { id: "eq-029", name: "Surgical Lights", type: "Medical Equipment", status: "Broken" as const }
+          ],
+          occupancy: { current: 0, maximum: 10 },
+          lastInspection: "09/08/2025",
+          nextMaintenance: "25/08/2025"
+        }
+      ]
+    }
+  ]
+
+  // Room helper functions
+  const currentFloor = floors.find(f => f.number === selectedFloor)
+  const filteredRooms = currentFloor?.rooms.filter(room => {
+    const matchesSearch = room.name.toLowerCase().includes(roomSearchQuery.toLowerCase()) ||
+                         room.number.toLowerCase().includes(roomSearchQuery.toLowerCase())
+    const matchesType = roomFilterType === 'all' || room.type === roomFilterType
+    const matchesStatus = roomFilterStatus === 'all' || room.status === roomFilterStatus
+    return matchesSearch && matchesType && matchesStatus
+  }) || []
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Active': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+      case 'Under Maintenance': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+      case 'Closed': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+      case 'Renovation': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+    }
+  }
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'Ward': return '🏥'
+      case 'Operating Theater': return '🏥'
+      case 'Laboratory': return '🔬'
+      case 'Office': return '🏢'
+      case 'Storage': return '📦'
+      case 'Emergency': return '🚨'
+      case 'Consultation': return '👨‍⚕️'
+      case 'Pharmacy': return '💊'
+      case 'Kitchen': return '🍽️'
+      case 'Utility': return '🔧'
+      default: return '🏠'
+    }
+  }
+
+  const roomTypes = ['Ward', 'Operating Theater', 'Laboratory', 'Office', 'Storage', 'Emergency', 'Consultation', 'Pharmacy', 'Kitchen', 'Utility']
+  
   // Handle case when asset is not found
   if (!asset) {
     return (
@@ -1908,6 +2632,8 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: '📋' },
     { id: 'specifications', label: 'Specifications', icon: '📐' },
+    { id: 'rooms', label: 'Room Management', icon: '🏠' },
+    { id: 'assessments', label: 'Condition Assessment', icon: '🔍' },
     { id: 'inventory', label: 'Equipment Inventory', icon: '📦' },
     { id: 'financial', label: 'Financial', icon: '💰' },
     { id: 'maintenance', label: 'Maintenance', icon: '🔧' },
@@ -2857,27 +3583,94 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
 
         {/* Navigation Tabs */}
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
-          <div className="border-b border-gray-200 dark:border-gray-700">
-            <nav className="flex space-x-8 px-6">
-              {tabs.map((tab) => (
+          <div className="border-b border-gray-200 dark:border-gray-700 px-6 pb-4">
+            <div className="flex items-center justify-between">
+              <div className="relative tab-dropdown">
                 <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                  }`}
+                  onClick={() => setShowTabDropdown(!showTabDropdown)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <span className="mr-2">{tab.icon}</span>
-                  {tab.label}
+                  <span className="text-lg">{tabs.find(t => t.id === activeTab)?.icon}</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{tabs.find(t => t.id === activeTab)?.label}</span>
+                  <svg className={`w-4 h-4 transition-transform ${showTabDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
                 </button>
-              ))}
-            </nav>
+                
+                {showTabDropdown && (
+                  <div className="absolute top-full left-0 mt-1 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                    <div className="py-1">
+                      {tabs.map((tab) => (
+                        <button
+                          key={tab.id}
+                          onClick={() => {
+                            setActiveTab(tab.id)
+                            setShowTabDropdown(false)
+                          }}
+                          className={`w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                            activeTab === tab.id
+                              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                              : 'text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <span className="text-lg">{tab.icon}</span>
+                          <div>
+                            <div className="font-medium">{tab.label}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              {tab.id === 'overview' && 'Asset summary and key information'}
+                              {tab.id === 'specifications' && 'Technical details and dimensions'}
+                              {tab.id === 'rooms' && 'Floor plans and room management'}
+                              {tab.id === 'assessments' && 'Condition reports and issues'}
+                              {tab.id === 'inventory' && 'Equipment and asset inventory'}
+                              {tab.id === 'financial' && 'Costs, valuation, and budget'}
+                              {tab.id === 'maintenance' && 'Maintenance history and schedules'}
+                              {tab.id === 'documents' && 'Files, certificates, and records'}
+                              {tab.id === 'images' && 'Photos, drawings, and plans'}
+                              {tab.id === 'audit' && 'Change history and audit logs'}
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Quick Action Buttons */}
+              <div className="flex items-center space-x-2">
+                {activeTab === 'assessments' && (
+                  <button 
+                    onClick={() => router.push(`/dashboard/assets/${params.id}/assessments`)}
+                    className="px-3 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    <span>1 Critical Issue</span>
+                  </button>
+                )}
+                {activeTab === 'rooms' && (
+                  <button 
+                    className="px-3 py-1 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <span>{floors.reduce((sum, floor) => sum + floor.totalRooms, 0)} Rooms</span>
+                  </button>
+                )}
+                <button className="px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  <span>Export</span>
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Tab Content */}
-          <div className="p-6">
+          <div className="p-6 overflow-visible">
             {/* Overview Tab */}
             {activeTab === 'overview' && (
               <div className="space-y-6">
@@ -2931,6 +3724,53 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                     </div>
                   </div>
                 </div>
+
+                {/* Quick Actions */}
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <button
+                  onClick={() => setActiveTab('rooms')}
+                  className="flex items-center justify-center space-x-2 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                >
+                  <span className="text-2xl">🏠</span>
+                  <div className="text-left">
+                    <div className="font-medium text-blue-900 dark:text-blue-100">View Rooms</div>
+                    <div className="text-sm text-blue-600 dark:text-blue-300">{floors.reduce((sum, floor) => sum + floor.totalRooms, 0)} rooms across {floors.length} floors</div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setActiveTab('assessments')}
+                  className="flex items-center justify-center space-x-2 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                >
+                  <span className="text-2xl">🔍</span>
+                  <div className="text-left">
+                    <div className="font-medium text-red-900 dark:text-red-100">Condition Assessment</div>
+                    <div className="text-sm text-red-600 dark:text-red-300">1 critical issue requiring attention</div>
+                  </div>
+                </button>
+                    <button
+                      onClick={() => setActiveTab('inventory')}
+                      className="flex items-center justify-center space-x-2 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
+                    >
+                      <span className="text-2xl">📦</span>
+                      <div className="text-left">
+                        <div className="font-medium text-green-900 dark:text-green-100">Equipment</div>
+                        <div className="text-sm text-green-600 dark:text-green-300">View all equipment</div>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('maintenance')}
+                      className="flex items-center justify-center space-x-2 p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors"
+                    >
+                      <span className="text-2xl">🔧</span>
+                      <div className="text-left">
+                        <div className="font-medium text-orange-900 dark:text-orange-100">Maintenance</div>
+                        <div className="text-sm text-orange-600 dark:text-orange-300">Schedule & history</div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -2979,6 +3819,294 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* Room Management Tab */}
+            {activeTab === 'rooms' && (
+              <div className="space-y-6">
+                {/* Room Management Header */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">Room Management</h3>
+                    <p className="text-gray-600 dark:text-gray-400">Manage individual rooms and floors within this building</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                      <button
+                        onClick={() => setRoomViewMode('list')}
+                        className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                          roomViewMode === 'list'
+                            ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                        }`}
+                      >
+                        📋 List View
+                      </button>
+                      <button
+                        onClick={() => setRoomViewMode('floorplan')}
+                        className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                          roomViewMode === 'floorplan'
+                            ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                        }`}
+                      >
+                        🏗️ Floor Plan
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => setShowAddRoomModal(true)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                      <span>Add Room</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Floor Plan View */}
+                {roomViewMode === 'floorplan' && (
+                  <ArchitecturalFloorPlan
+                    floors={floors}
+                    selectedFloor={selectedFloor}
+                    onFloorSelect={setSelectedFloor}
+                    onRoomSelect={(room) => router.push(`/dashboard/assets/${params.id}/rooms/${room.id}`)}
+                    viewMode={floorPlanMode}
+                    onViewModeChange={setFloorPlanMode}
+                  />
+                )}
+
+                {/* List View */}
+                {roomViewMode === 'list' && (
+                  <>
+                    {/* Floor Navigation */}
+                    <div className="mb-6">
+                      <div className="flex items-center space-x-4 mb-4">
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white">Select Floor</h4>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {floors.map((floor) => (
+                          <div
+                            key={floor.number}
+                            onClick={() => setSelectedFloor(floor.number)}
+                            className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                              selectedFloor === floor.number
+                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <h5 className="font-semibold text-gray-900 dark:text-white">Floor {floor.number}</h5>
+                              <span className="text-2xl">🏢</span>
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{floor.name}</p>
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div>
+                                <span className="text-gray-500 dark:text-gray-400">Rooms:</span>
+                                <span className="ml-1 font-medium text-gray-900 dark:text-white">{floor.totalRooms}</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-500 dark:text-gray-400">Area:</span>
+                                <span className="ml-1 font-medium text-gray-900 dark:text-white">{floor.totalArea} sqm</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Room Filters */}
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        placeholder="Search rooms..."
+                        value={roomSearchQuery}
+                        onChange={(e) => setRoomSearchQuery(e.target.value)}
+                        className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <select
+                        value={roomFilterType}
+                        onChange={(e) => setRoomFilterType(e.target.value)}
+                        className="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      >
+                        <option value="all">All Types</option>
+                        {roomTypes.map(type => (
+                          <option key={type} value={type}>{type}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <select
+                        value={roomFilterStatus}
+                        onChange={(e) => setRoomFilterStatus(e.target.value)}
+                        className="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      >
+                        <option value="all">All Status</option>
+                        <option value="Active">Active</option>
+                        <option value="Under Maintenance">Under Maintenance</option>
+                        <option value="Closed">Closed</option>
+                        <option value="Renovation">Renovation</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Current Floor Info */}
+                {currentFloor && (
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                          Floor {currentFloor.number} - {currentFloor.name}
+                        </h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-600 dark:text-gray-400">Total Rooms:</span>
+                            <span className="ml-2 font-semibold text-gray-900 dark:text-white">{currentFloor.totalRooms}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600 dark:text-gray-400">Total Area:</span>
+                            <span className="ml-2 font-semibold text-gray-900 dark:text-white">{currentFloor.totalArea} sqm</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600 dark:text-gray-400">Active Rooms:</span>
+                            <span className="ml-2 font-semibold text-green-600">{currentFloor.rooms.filter(r => r.status === 'Active').length}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600 dark:text-gray-400">Under Maintenance:</span>
+                            <span className="ml-2 font-semibold text-yellow-600">{currentFloor.rooms.filter(r => r.status === 'Under Maintenance').length}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-4xl">🏢</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Rooms Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredRooms.map((room) => (
+                    <div
+                      key={room.id}
+                      className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-all cursor-pointer"
+                      onClick={() => router.push(`/dashboard/assets/${params.id}/rooms/${room.id}`)}
+                    >
+                      {/* Room Header */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-3">
+                          <span className="text-2xl">{getTypeIcon(room.type)}</span>
+                          <div>
+                            <h5 className="font-semibold text-gray-900 dark:text-white">{room.name}</h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{room.number}</p>
+                          </div>
+                        </div>
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(room.status)}`}>
+                          {room.status}
+                        </span>
+                      </div>
+
+                      {/* Room Details */}
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-500 dark:text-gray-400">Type:</span>
+                            <span className="ml-1 text-gray-900 dark:text-white">{room.type}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500 dark:text-gray-400">Area:</span>
+                            <span className="ml-1 text-gray-900 dark:text-white">{room.area} sqm</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500 dark:text-gray-400">Capacity:</span>
+                            <span className="ml-1 text-gray-900 dark:text-white">{room.capacity}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500 dark:text-gray-400">Equipment:</span>
+                            <span className="ml-1 text-gray-900 dark:text-white">{room.equipment.length}</span>
+                          </div>
+                        </div>
+
+                        {/* Occupancy Bar */}
+                        <div>
+                          <div className="flex items-center justify-between text-sm mb-1">
+                            <span className="text-gray-600 dark:text-gray-400">Occupancy</span>
+                            <span className="text-gray-900 dark:text-white">{room.occupancy.current}/{room.occupancy.maximum}</span>
+                          </div>
+                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div
+                              className="bg-blue-600 h-2 rounded-full"
+                              style={{ width: `${(room.occupancy.current / room.occupancy.maximum) * 100}%` }}
+                            ></div>
+                          </div>
+                        </div>
+
+                        {/* Equipment Status */}
+                        <div className="flex items-center space-x-4 text-xs">
+                          <div className="flex items-center space-x-1">
+                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span className="text-gray-600 dark:text-gray-400">Working: {room.equipment.filter(e => e.status === 'Working').length}</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                            <span className="text-gray-600 dark:text-gray-400">Maintenance: {room.equipment.filter(e => e.status === 'Maintenance').length}</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                            <span className="text-gray-600 dark:text-gray-400">Broken: {room.equipment.filter(e => e.status === 'Broken').length}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {filteredRooms.length === 0 && (
+                  <div className="text-center py-12">
+                    <div className="text-gray-400 mb-4">
+                      <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                    </div>
+                    <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Rooms Found</h4>
+                    <p className="text-gray-600 dark:text-gray-400">No rooms match your current filters.</p>
+                  </div>
+                )}
+
+                {/* Quick Stats Summary */}
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Building Summary</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{floors.reduce((sum, floor) => sum + floor.totalRooms, 0)}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Total Rooms</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600 dark:text-green-400">{floors.reduce((sum, floor) => sum + floor.rooms.filter(r => r.status === 'Active').length, 0)}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Active Rooms</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{floors.reduce((sum, floor) => sum + floor.rooms.filter(r => r.status === 'Under Maintenance').length, 0)}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Under Maintenance</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{floors.length}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Total Floors</div>
+                    </div>
+                  </div>
+                </div>
+                </>
+                )}
+              </div>
+            )}
+
+            {/* Condition Assessment Tab */}
+            {activeTab === 'assessments' && (
+              <ConditionAssessmentContent assetId={params.id as string} />
             )}
 
             {/* Equipment Inventory Tab */}
@@ -4246,6 +5374,114 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
           </div>
         </div>
       </div>
+
+      {/* Add Room Modal */}
+      {showAddRoomModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-auto">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Add New Room</h3>
+              <button
+                onClick={() => setShowAddRoomModal(false)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Room Number *
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    placeholder="e.g., GF-005"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Room Name *
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    placeholder="e.g., Consultation Room 5"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Floor
+                  </label>
+                  <select className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    {floors.map(floor => (
+                      <option key={floor.number} value={floor.number}>Floor {floor.number}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Room Type
+                  </label>
+                  <select className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    {roomTypes.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Area (sqm)
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    placeholder="0"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Capacity
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={() => setShowAddRoomModal(false)}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    // In a real app, this would make an API call
+                    console.log('Adding room...')
+                    setShowAddRoomModal(false)
+                  }}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                >
+                  Add Room
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Image Modal */}
       {selectedImage && (

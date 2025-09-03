@@ -12,6 +12,47 @@ interface EquipmentItem {
   description?: string
 }
 
+interface Room {
+  id: string
+  number: string
+  name: string
+  floor: number
+  type: 'Ward' | 'Operating Theater' | 'Laboratory' | 'Office' | 'Storage' | 'Emergency' | 'Consultation' | 'Pharmacy' | 'Kitchen' | 'Utility'
+  area: number
+  capacity: number
+  status: 'Active' | 'Under Maintenance' | 'Closed' | 'Renovation'
+  position: {
+    x: number
+    y: number
+    width: number
+    height: number
+  }
+  equipment: Array<{
+    id: string
+    name: string
+    type: string
+    status: 'Working' | 'Maintenance' | 'Broken'
+  }>
+  occupancy: {
+    current: number
+    maximum: number
+  }
+  lastInspection: string
+  nextMaintenance: string
+}
+
+interface Floor {
+  number: number
+  name: string
+  rooms: Room[]
+  totalArea: number
+  totalRooms: number
+  dimensions: {
+    width: number
+    height: number
+  }
+}
+
 export default function NewAssetPage() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
@@ -20,11 +61,12 @@ export default function NewAssetPage() {
   const steps = [
     { id: 1, title: "Basic Information", description: "Asset details and category" },
     { id: 2, title: "Physical Specifications", description: "Building details and dimensions" },
-    { id: 3, title: "Systems & Utilities", description: "HVAC, electrical, and utilities" },
-    { id: 4, title: "Equipment Inventory", description: "AC units, doors, windows, lighting" },
-    { id: 5, title: "Location & Financial", description: "Address, coordinates, and valuation" },
-    { id: 6, title: "Documents & Media", description: "Upload documents, images, and certificates" },
-    { id: 7, title: "Maintenance & Audit", description: "Maintenance info and audit trail" }
+    { id: 3, title: "Room Management", description: "Create floors and individual rooms" },
+    { id: 4, title: "Systems & Utilities", description: "HVAC, electrical, and utilities" },
+    { id: 5, title: "Equipment Inventory", description: "AC units, doors, windows, lighting" },
+    { id: 6, title: "Location & Financial", description: "Address, coordinates, and valuation" },
+    { id: 7, title: "Documents & Media", description: "Upload documents, images, and certificates" },
+    { id: 8, title: "Maintenance & Audit", description: "Maintenance info and audit trail" }
   ]
 
   const [formData, setFormData] = useState({
@@ -98,6 +140,9 @@ export default function NewAssetPage() {
     kitchens: "",
     conferenceRooms: "",
     securityOffice: "",
+    // Room Management
+    buildingFloors: [] as Floor[],
+    roomManagementEnabled: false,
     // Accessibility
     wheelchairAccessible: "",
     elevatorAccess: "",
@@ -112,6 +157,25 @@ export default function NewAssetPage() {
     totalDoors: "",
     staircases: "",
     plumbingSystem: ""
+  })
+
+  // Room Management State
+  const [floors, setFloors] = useState<Floor[]>([])
+  const [showAddFloorModal, setShowAddFloorModal] = useState(false)
+  const [showAddRoomModal, setShowAddRoomModal] = useState(false)
+  const [selectedFloorForRoom, setSelectedFloorForRoom] = useState<number | null>(null)
+  const [newFloor, setNewFloor] = useState({
+    number: 1,
+    name: '',
+    dimensions: { width: 800, height: 600 }
+  })
+  const [newRoom, setNewRoom] = useState({
+    number: '',
+    name: '',
+    type: 'Office' as Room['type'],
+    area: 0,
+    capacity: 0,
+    position: { x: 100, y: 100, width: 120, height: 80 }
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -325,6 +389,147 @@ export default function NewAssetPage() {
       default:
         return {}
     }
+  }
+
+  // Room Management Functions
+  const addFloor = () => {
+    if (!newFloor.name.trim()) return
+    
+    const floor: Floor = {
+      number: newFloor.number,
+      name: newFloor.name,
+      rooms: [],
+      totalArea: 0,
+      totalRooms: 0,
+      dimensions: newFloor.dimensions
+    }
+    
+    setFloors(prev => [...prev, floor])
+    setNewFloor({
+      number: Math.max(...floors.map(f => f.number), 0) + 1,
+      name: '',
+      dimensions: { width: 800, height: 600 }
+    })
+    setShowAddFloorModal(false)
+    
+    // Update form data
+    setFormData(prev => ({
+      ...prev,
+      buildingFloors: [...prev.buildingFloors, floor],
+      floors: String(floors.length + 1)
+    }))
+  }
+
+  const addRoom = () => {
+    if (!newRoom.name.trim() || !newRoom.number.trim() || selectedFloorForRoom === null) return
+    
+    const room: Room = {
+      id: `${selectedFloorForRoom}-${newRoom.number}`,
+      number: newRoom.number,
+      name: newRoom.name,
+      floor: selectedFloorForRoom,
+      type: newRoom.type,
+      area: newRoom.area,
+      capacity: newRoom.capacity,
+      status: 'Active',
+      position: newRoom.position,
+      equipment: [],
+      occupancy: { current: 0, maximum: newRoom.capacity },
+      lastInspection: new Date().toLocaleDateString(),
+      nextMaintenance: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toLocaleDateString()
+    }
+    
+    setFloors(prev => prev.map(floor => 
+      floor.number === selectedFloorForRoom
+        ? {
+            ...floor,
+            rooms: [...floor.rooms, room],
+            totalRooms: floor.totalRooms + 1,
+            totalArea: floor.totalArea + newRoom.area
+          }
+        : floor
+    ))
+    
+    setNewRoom({
+      number: '',
+      name: '',
+      type: 'Office',
+      area: 0,
+      capacity: 0,
+      position: { x: 100, y: 100, width: 120, height: 80 }
+    })
+    setShowAddRoomModal(false)
+    
+    // Update form data
+    const updatedFloors = floors.map(floor => 
+      floor.number === selectedFloorForRoom
+        ? {
+            ...floor,
+            rooms: [...floor.rooms, room],
+            totalRooms: floor.totalRooms + 1,
+            totalArea: floor.totalArea + newRoom.area
+          }
+        : floor
+    )
+    setFormData(prev => ({
+      ...prev,
+      buildingFloors: updatedFloors,
+      totalRooms: String(updatedFloors.reduce((sum, f) => sum + f.totalRooms, 0))
+    }))
+  }
+
+  const removeFloor = (floorNumber: number) => {
+    setFloors(prev => prev.filter(f => f.number !== floorNumber))
+    setFormData(prev => ({
+      ...prev,
+      buildingFloors: prev.buildingFloors.filter(f => f.number !== floorNumber),
+      floors: String(floors.length - 1)
+    }))
+  }
+
+  const removeRoom = (floorNumber: number, roomId: string) => {
+    setFloors(prev => prev.map(floor => 
+      floor.number === floorNumber
+        ? {
+            ...floor,
+            rooms: floor.rooms.filter(r => r.id !== roomId),
+            totalRooms: floor.totalRooms - 1,
+            totalArea: floor.totalArea - (floor.rooms.find(r => r.id === roomId)?.area || 0)
+          }
+        : floor
+    ))
+    
+    const updatedFloors = floors.map(floor => 
+      floor.number === floorNumber
+        ? {
+            ...floor,
+            rooms: floor.rooms.filter(r => r.id !== roomId),
+            totalRooms: floor.totalRooms - 1,
+            totalArea: floor.totalArea - (floor.rooms.find(r => r.id === roomId)?.area || 0)
+          }
+        : floor
+    )
+    setFormData(prev => ({
+      ...prev,
+      buildingFloors: updatedFloors,
+      totalRooms: String(updatedFloors.reduce((sum, f) => sum + f.totalRooms, 0))
+    }))
+  }
+
+  const getRoomTypeIcon = (type: Room['type']) => {
+    const icons = {
+      'Ward': '🏥',
+      'Operating Theater': '⚕️',
+      'Laboratory': '🧪',
+      'Office': '🏢',
+      'Storage': '📦',
+      'Emergency': '🚨',
+      'Consultation': '👩‍⚕️',
+      'Pharmacy': '💊',
+      'Kitchen': '🍽️',
+      'Utility': '🔧'
+    }
+    return icons[type] || '🏠'
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -1028,8 +1233,209 @@ export default function NewAssetPage() {
           </div>
           )}
 
-          {/* Step 3: Systems & Utilities */}
-          {currentStep === 3 && (
+          {/* Step 3: Room Management (Only for Buildings) */}
+          {currentStep === 3 && formData.category === "Building" && (
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center mb-6">
+              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mr-3">
+                <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Room Management</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Create floors and individual rooms for this building</p>
+              </div>
+            </div>
+
+            {/* Enable Room Management Toggle */}
+            <div className="mb-6">
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="roomManagementEnabled"
+                  checked={formData.roomManagementEnabled}
+                  onChange={(e) => setFormData(prev => ({ ...prev, roomManagementEnabled: e.target.checked }))}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                />
+                <label htmlFor="roomManagementEnabled" className="text-sm font-medium text-gray-900 dark:text-white">
+                  Enable detailed room management for this building
+                </label>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                This will allow you to create individual floors and rooms with their own specifications and equipment
+              </p>
+            </div>
+
+            {formData.roomManagementEnabled && (
+              <div className="space-y-6">
+                {/* Floors Section */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-md font-semibold text-gray-900 dark:text-white">Building Floors</h4>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddFloorModal(true)}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center space-x-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      <span>Add Floor</span>
+                    </button>
+                  </div>
+
+                  {floors.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                      <svg className="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                      <p>No floors created yet. Add your first floor to get started.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {floors.map((floor) => (
+                        <div key={floor.number} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <h5 className="font-semibold text-gray-900 dark:text-white">Floor {floor.number}</h5>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">{floor.name}</p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeFloor(floor.number)}
+                              className="text-red-600 hover:text-red-700 p-1"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4 mb-3 text-sm">
+                            <div>
+                              <span className="text-gray-600 dark:text-gray-400">Rooms:</span>
+                              <span className="ml-1 font-medium text-gray-900 dark:text-white">{floor.totalRooms}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-600 dark:text-gray-400">Area:</span>
+                              <span className="ml-1 font-medium text-gray-900 dark:text-white">{floor.totalArea} sqm</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedFloorForRoom(floor.number)
+                                setShowAddRoomModal(true)
+                              }}
+                              className="px-3 py-1 bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800 text-green-700 dark:text-green-300 rounded text-sm font-medium transition-colors"
+                            >
+                              Add Room
+                            </button>
+                            
+                            {floor.rooms.length > 0 && (
+                              <div className="flex -space-x-2">
+                                {floor.rooms.slice(0, 3).map((room) => (
+                                  <div
+                                    key={room.id}
+                                    className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center text-xs font-medium text-blue-700 dark:text-blue-300 border-2 border-white dark:border-gray-800"
+                                    title={room.name}
+                                  >
+                                    {getRoomTypeIcon(room.type)}
+                                  </div>
+                                ))}
+                                {floor.rooms.length > 3 && (
+                                  <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center text-xs font-medium text-gray-600 dark:text-gray-400 border-2 border-white dark:border-gray-800">
+                                    +{floor.rooms.length - 3}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Room List for this floor */}
+                          {floor.rooms.length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                              <div className="space-y-2">
+                                {floor.rooms.map((room) => (
+                                  <div key={room.id} className="flex items-center justify-between text-sm">
+                                    <div className="flex items-center space-x-2">
+                                      <span>{getRoomTypeIcon(room.type)}</span>
+                                      <span className="text-gray-900 dark:text-white">{room.name}</span>
+                                      <span className="text-gray-500 dark:text-gray-400">({room.number})</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <span className="text-gray-600 dark:text-gray-400">{room.area}m²</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => removeRoom(floor.number, room.id)}
+                                        className="text-red-600 hover:text-red-700 p-1"
+                                      >
+                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Summary */}
+                {floors.length > 0 && (
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Building Summary</h4>
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-600 dark:text-gray-400">Total Floors:</span>
+                        <span className="ml-1 font-medium text-gray-900 dark:text-white">{floors.length}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600 dark:text-gray-400">Total Rooms:</span>
+                        <span className="ml-1 font-medium text-gray-900 dark:text-white">{floors.reduce((sum, f) => sum + f.totalRooms, 0)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600 dark:text-gray-400">Total Area:</span>
+                        <span className="ml-1 font-medium text-gray-900 dark:text-white">{floors.reduce((sum, f) => sum + f.totalArea, 0)} sqm</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          )}
+
+          {/* Skip to Step 4 for non-Building assets */}
+          {currentStep === 3 && formData.category !== "Building" && (
+            <div className="text-center py-8">
+              <div className="text-gray-500 dark:text-gray-400 mb-4">
+                <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-lg font-medium">Room Management</p>
+                <p className="text-sm">Available only for Building assets</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCurrentStep(4)}
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+              >
+                Continue to Systems & Utilities
+              </button>
+            </div>
+          )}
+
+          {/* Step 4: Systems & Utilities */}
+          {currentStep === 4 && (
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 ">
             <div className="flex items-center mb-6">
               <div className="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mr-3">
@@ -1119,8 +1525,8 @@ export default function NewAssetPage() {
           </div>
           )}
 
-          {/* Step 4: Equipment Inventory */}
-          {currentStep === 4 && (
+          {/* Step 5: Equipment Inventory */}
+          {currentStep === 5 && (
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 ">
             <div className="flex items-center mb-6">
               <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mr-3">
@@ -1457,8 +1863,8 @@ export default function NewAssetPage() {
           </div>
           )}
 
-          {/* Step 5: Location & Financial */}
-          {currentStep === 5 && (
+          {/* Step 6: Location & Financial */}
+          {currentStep === 6 && (
           <>
           {/* Location Information */}
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 ">
@@ -1695,8 +2101,8 @@ export default function NewAssetPage() {
           </>
           )}
 
-          {/* Step 6: Documents & Media */}
-          {currentStep === 6 && (
+          {/* Step 7: Documents & Media */}
+          {currentStep === 7 && (
           <>
           {/* Documents & Files */}
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 ">
@@ -1812,8 +2218,8 @@ export default function NewAssetPage() {
           </>
           )}
 
-          {/* Step 7: Maintenance & Audit */}
-          {currentStep === 7 && (
+          {/* Step 8: Maintenance & Audit */}
+          {currentStep === 8 && (
           <>
           {/* Maintenance Information */}
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 ">
@@ -2342,6 +2748,284 @@ export default function NewAssetPage() {
             </div>
           </div>
         </form>
+
+        {/* Add Floor Modal */}
+        {showAddFloorModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl max-w-md w-full p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Add New Floor</h3>
+                <button
+                  onClick={() => setShowAddFloorModal(false)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Floor Number
+                  </label>
+                  <input
+                    type="number"
+                    value={newFloor.number}
+                    onChange={(e) => setNewFloor(prev => ({ ...prev, number: parseInt(e.target.value) || 1 }))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    min="1"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Floor Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newFloor.name}
+                    onChange={(e) => setNewFloor(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="e.g., Ground Floor, First Floor, Operating Theater Floor"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Plan Width (px)
+                    </label>
+                    <input
+                      type="number"
+                      value={newFloor.dimensions.width}
+                      onChange={(e) => setNewFloor(prev => ({ 
+                        ...prev, 
+                        dimensions: { ...prev.dimensions, width: parseInt(e.target.value) || 800 }
+                      }))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      min="400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Plan Height (px)
+                    </label>
+                    <input
+                      type="number"
+                      value={newFloor.dimensions.height}
+                      onChange={(e) => setNewFloor(prev => ({ 
+                        ...prev, 
+                        dimensions: { ...prev.dimensions, height: parseInt(e.target.value) || 600 }
+                      }))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      min="300"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 mt-6">
+                <button
+                  onClick={() => setShowAddFloorModal(false)}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={addFloor}
+                  disabled={!newFloor.name.trim()}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
+                >
+                  Add Floor
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add Room Modal */}
+        {showAddRoomModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl max-w-lg w-full p-6 max-h-[90vh] overflow-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Add New Room</h3>
+                <button
+                  onClick={() => setShowAddRoomModal(false)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Room Number
+                    </label>
+                    <input
+                      type="text"
+                      value={newRoom.number}
+                      onChange={(e) => setNewRoom(prev => ({ ...prev, number: e.target.value }))}
+                      placeholder="e.g., GF-001, SF-101"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Floor
+                    </label>
+                    <select
+                      value={selectedFloorForRoom || ''}
+                      onChange={(e) => setSelectedFloorForRoom(parseInt(e.target.value))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Select Floor</option>
+                      {floors.map((floor) => (
+                        <option key={floor.number} value={floor.number}>
+                          Floor {floor.number} - {floor.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Room Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newRoom.name}
+                    onChange={(e) => setNewRoom(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="e.g., Main Reception, Operating Theater 1"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Room Type
+                  </label>
+                  <select
+                    value={newRoom.type}
+                    onChange={(e) => setNewRoom(prev => ({ ...prev, type: e.target.value as Room['type'] }))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="Office">Office</option>
+                    <option value="Ward">Ward</option>
+                    <option value="Operating Theater">Operating Theater</option>
+                    <option value="Laboratory">Laboratory</option>
+                    <option value="Storage">Storage</option>
+                    <option value="Emergency">Emergency</option>
+                    <option value="Consultation">Consultation</option>
+                    <option value="Pharmacy">Pharmacy</option>
+                    <option value="Kitchen">Kitchen</option>
+                    <option value="Utility">Utility</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Area (sqm)
+                    </label>
+                    <input
+                      type="number"
+                      value={newRoom.area}
+                      onChange={(e) => setNewRoom(prev => ({ ...prev, area: parseInt(e.target.value) || 0 }))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      min="1"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Capacity (people)
+                    </label>
+                    <input
+                      type="number"
+                      value={newRoom.capacity}
+                      onChange={(e) => setNewRoom(prev => ({ ...prev, capacity: parseInt(e.target.value) || 0 }))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      min="1"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Position on Floor Plan
+                  </label>
+                  <div className="grid grid-cols-4 gap-2">
+                    <input
+                      type="number"
+                      placeholder="X"
+                      value={newRoom.position.x}
+                      onChange={(e) => setNewRoom(prev => ({ 
+                        ...prev, 
+                        position: { ...prev.position, x: parseInt(e.target.value) || 100 }
+                      }))}
+                      className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Y"
+                      value={newRoom.position.y}
+                      onChange={(e) => setNewRoom(prev => ({ 
+                        ...prev, 
+                        position: { ...prev.position, y: parseInt(e.target.value) || 100 }
+                      }))}
+                      className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Width"
+                      value={newRoom.position.width}
+                      onChange={(e) => setNewRoom(prev => ({ 
+                        ...prev, 
+                        position: { ...prev.position, width: parseInt(e.target.value) || 120 }
+                      }))}
+                      className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Height"
+                      value={newRoom.position.height}
+                      onChange={(e) => setNewRoom(prev => ({ 
+                        ...prev, 
+                        position: { ...prev.position, height: parseInt(e.target.value) || 80 }
+                      }))}
+                      className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Position coordinates for the architectural floor plan
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 mt-6">
+                <button
+                  onClick={() => setShowAddRoomModal(false)}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={addRoom}
+                  disabled={!newRoom.name.trim() || !newRoom.number.trim() || !selectedFloorForRoom}
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
+                >
+                  Add Room
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         </div>
       </div>
     </div>
