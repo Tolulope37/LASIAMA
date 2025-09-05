@@ -1,13 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import InteractiveMap from "@/components/InteractiveMap"
+import LagosGISMap from "@/components/LagosGISMap"
 
 export default function MapPage() {
-  const [assetsOnMap] = useState(4)
+  const [assetsOnMap] = useState(8)
   const [activeFaults] = useState(0)
-  const [criticalIssues] = useState(0)
-  const [maintenanceDue] = useState(1)
+  const [criticalIssues] = useState(2)
+  const [maintenanceDue] = useState(2)
 
   return (
     <div className="flex-1 overflow-auto">
@@ -20,9 +20,9 @@ export default function MapPage() {
                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 </svg>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Interactive Asset Map</h1>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Lagos State eGIS Asset Map</h1>
               </div>
-              <p className="text-gray-600 dark:text-gray-400">View and manage assets and faults across all locations</p>
+              <p className="text-gray-600 dark:text-gray-400">Geographic Information System for Lagos State asset management</p>
             </div>
             <div className="flex items-center space-x-3">
               <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
@@ -107,13 +107,13 @@ export default function MapPage() {
                 <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 </svg>
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Asset & Fault Locations</h2>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Lagos State eGIS Portal</h2>
               </div>
               <div className="flex items-center space-x-4">
                                   <div className="flex items-center space-x-2">
                     <input type="checkbox" id="assets" className="rounded" defaultChecked />
                     <label htmlFor="assets" className="text-sm text-gray-600 dark:text-gray-400">
-                      Assets (4)
+                      Assets (8)
                     </label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -146,8 +146,8 @@ export default function MapPage() {
               </div>
             </div>
 
-            {/* Real Interactive Map */}
-            <InteractiveMap />
+            {/* Lagos State eGIS Map */}
+            <LagosGISMap />
           </div>
         </div>
 

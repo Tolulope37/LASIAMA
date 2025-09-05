@@ -89,7 +89,7 @@ export default function DashboardLayout({
         { name: 'Contract Details', href: '/dashboard/contract-management/contract-details' },
         { name: 'Contract Visits', href: '/dashboard/contract-management/contract-visits' },
         { name: 'Contract Payment Details', href: '/dashboard/contract-management/contract-payment-details' },
-        { name: 'Reports', href: '/dashboard/contract-management/reports' }
+        { name: 'Invoices', href: '/dashboard/contract-management/invoices' }
       ]
     },
     // Continue with remaining items
