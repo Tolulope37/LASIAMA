@@ -66,6 +66,21 @@ export default function RoomDetailsPage() {
   }
 
   const [activeTab, setActiveTab] = useState('overview')
+  const [showScheduleModal, setShowScheduleModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editFormData, setEditFormData] = useState<Room>(room)
+  const [newMaintenanceTask, setNewMaintenanceTask] = useState({
+    title: '',
+    type: 'Preventive',
+    priority: 'Medium',
+    description: '',
+    scheduledDate: '',
+    estimatedDuration: '',
+    assignedTo: '',
+    category: '',
+    cost: '',
+    notes: ''
+  })
 
   const getStatusColor = (status: Room['status']) => {
     switch (status) {
@@ -136,7 +151,13 @@ export default function RoomDetailsPage() {
               <span className={`px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(room.status)}`}>
                 {room.status}
               </span>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+              <button 
+                onClick={() => {
+                  setEditFormData(room)
+                  setShowEditModal(true)
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
                 Edit Room
               </button>
             </div>
@@ -331,7 +352,10 @@ export default function RoomDetailsPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Maintenance Schedule</h3>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+              <button 
+                onClick={() => setShowScheduleModal(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
                 Schedule Maintenance
               </button>
             </div>
@@ -362,6 +386,525 @@ export default function RoomDetailsPage() {
           </div>
         )}
       </div>
+
+      {/* Edit Room Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Edit Room</h3>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false)
+                    setEditFormData(room)
+                  }}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                console.log('Room updated:', editFormData)
+                alert(`Room "${editFormData.name}" has been updated successfully!`)
+                setShowEditModal(false)
+              }}
+              className="p-6 space-y-6"
+            >
+              {/* Basic Information */}
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Basic Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Room Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editFormData.name}
+                      onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Room Number *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editFormData.number}
+                      onChange={(e) => setEditFormData({...editFormData, number: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Room Type *
+                    </label>
+                    <select
+                      required
+                      value={editFormData.type}
+                      onChange={(e) => setEditFormData({...editFormData, type: e.target.value as Room['type']})}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="Ward">Ward</option>
+                      <option value="Operating Theater">Operating Theater</option>
+                      <option value="Laboratory">Laboratory</option>
+                      <option value="Office">Office</option>
+                      <option value="Storage">Storage</option>
+                      <option value="Emergency">Emergency</option>
+                      <option value="Consultation">Consultation</option>
+                      <option value="Pharmacy">Pharmacy</option>
+                      <option value="Kitchen">Kitchen</option>
+                      <option value="Utility">Utility</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Floor *
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      value={editFormData.floor}
+                      onChange={(e) => setEditFormData({...editFormData, floor: parseInt(e.target.value)})}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Area (sqm) *
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min="1"
+                      value={editFormData.area}
+                      onChange={(e) => setEditFormData({...editFormData, area: parseInt(e.target.value)})}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Capacity (people) *
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min="1"
+                      value={editFormData.capacity}
+                      onChange={(e) => setEditFormData({...editFormData, capacity: parseInt(e.target.value)})}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Status
+                    </label>
+                    <select
+                      value={editFormData.status}
+                      onChange={(e) => setEditFormData({...editFormData, status: e.target.value as Room['status']})}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Under Maintenance">Under Maintenance</option>
+                      <option value="Closed">Closed</option>
+                      <option value="Renovation">Renovation</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Maximum Occupancy
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={editFormData.occupancy.maximum}
+                      onChange={(e) => setEditFormData({
+                        ...editFormData, 
+                        occupancy: {...editFormData.occupancy, maximum: parseInt(e.target.value)}
+                      })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Description
+                </label>
+                <textarea
+                  rows={3}
+                  value={editFormData.description || ''}
+                  onChange={(e) => setEditFormData({...editFormData, description: e.target.value})}
+                  placeholder="Room description and special features..."
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Environmental Settings */}
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Environmental Settings</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Temperature Range
+                    </label>
+                    <input
+                      type="text"
+                      value={editFormData.temperature || ''}
+                      onChange={(e) => setEditFormData({...editFormData, temperature: e.target.value})}
+                      placeholder="e.g., 18-22°C"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Humidity Range
+                    </label>
+                    <input
+                      type="text"
+                      value={editFormData.humidity || ''}
+                      onChange={(e) => setEditFormData({...editFormData, humidity: e.target.value})}
+                      placeholder="e.g., 45-55%"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Air Quality
+                    </label>
+                    <select
+                      value={editFormData.airQuality || 'Good'}
+                      onChange={(e) => setEditFormData({...editFormData, airQuality: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="Excellent">Excellent</option>
+                      <option value="Good">Good</option>
+                      <option value="Fair">Fair</option>
+                      <option value="Poor">Poor</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Form Actions */}
+              <div className="flex items-center justify-end space-x-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditModal(false)
+                    setEditFormData(room)
+                  }}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center space-x-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Save Changes</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Schedule Maintenance Modal */}
+      {showScheduleModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Schedule Room Maintenance</h3>
+                <button
+                  onClick={() => {
+                    setShowScheduleModal(false)
+                    setNewMaintenanceTask({
+                      title: '',
+                      type: 'Preventive',
+                      priority: 'Medium',
+                      description: '',
+                      scheduledDate: '',
+                      estimatedDuration: '',
+                      assignedTo: '',
+                      category: '',
+                      cost: '',
+                      notes: ''
+                    })
+                  }}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                const newTask = {
+                  id: `maint-${Date.now()}`,
+                  title: newMaintenanceTask.title,
+                  type: newMaintenanceTask.type,
+                  status: 'Scheduled',
+                  priority: newMaintenanceTask.priority,
+                  description: newMaintenanceTask.description,
+                  scheduledDate: newMaintenanceTask.scheduledDate,
+                  completedDate: null,
+                  duration: newMaintenanceTask.estimatedDuration,
+                  cost: newMaintenanceTask.cost ? `₦${parseInt(newMaintenanceTask.cost).toLocaleString()}` : 'TBD',
+                  workOrder: `WO-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9999)).padStart(4, '0')}`,
+                  technician: newMaintenanceTask.assignedTo || 'TBD',
+                  contractor: 'Internal Team',
+                  category: newMaintenanceTask.category || 'Room Maintenance',
+                  notes: newMaintenanceTask.notes,
+                  createdAt: new Date().toISOString(),
+                  createdBy: 'Admin User',
+                  room: room.name,
+                  roomId: room.id
+                }
+                console.log('New room maintenance task scheduled:', newTask)
+                alert(`Maintenance task "${newTask.title}" has been scheduled for ${room.name}!\nWork Order: ${newTask.workOrder}`)
+                setShowScheduleModal(false)
+                setNewMaintenanceTask({
+                  title: '',
+                  type: 'Preventive',
+                  priority: 'Medium',
+                  description: '',
+                  scheduledDate: '',
+                  estimatedDuration: '',
+                  assignedTo: '',
+                  category: '',
+                  cost: '',
+                  notes: ''
+                })
+              }}
+              className="p-6 space-y-6"
+            >
+              {/* Room Information */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <span className="text-2xl">{getTypeIcon(room.type)}</span>
+                  <div>
+                    <div className="font-medium text-gray-900 dark:text-white">{room.name}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">{room.number} • Floor {room.floor} • {room.type}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Task Details */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Task Title *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newMaintenanceTask.title}
+                    onChange={(e) => setNewMaintenanceTask({...newMaintenanceTask, title: e.target.value})}
+                    placeholder="e.g., HVAC System Check"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Maintenance Type
+                  </label>
+                  <select
+                    value={newMaintenanceTask.type}
+                    onChange={(e) => setNewMaintenanceTask({...newMaintenanceTask, type: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="Preventive">Preventive</option>
+                    <option value="Corrective">Corrective</option>
+                    <option value="Emergency">Emergency</option>
+                    <option value="Inspection">Inspection</option>
+                    <option value="Cleaning">Cleaning</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Priority Level
+                  </label>
+                  <select
+                    value={newMaintenanceTask.priority}
+                    onChange={(e) => setNewMaintenanceTask({...newMaintenanceTask, priority: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Critical">Critical</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Category
+                  </label>
+                  <select
+                    value={newMaintenanceTask.category}
+                    onChange={(e) => setNewMaintenanceTask({...newMaintenanceTask, category: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select Category</option>
+                    <option value="HVAC">HVAC</option>
+                    <option value="Electrical">Electrical</option>
+                    <option value="Plumbing">Plumbing</option>
+                    <option value="Medical Equipment">Medical Equipment</option>
+                    <option value="Structural">Structural</option>
+                    <option value="Safety Systems">Safety Systems</option>
+                    <option value="Cleaning">Cleaning</option>
+                    <option value="General">General</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Scheduled Date *
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={newMaintenanceTask.scheduledDate}
+                    onChange={(e) => setNewMaintenanceTask({...newMaintenanceTask, scheduledDate: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Estimated Duration
+                  </label>
+                  <input
+                    type="text"
+                    value={newMaintenanceTask.estimatedDuration}
+                    onChange={(e) => setNewMaintenanceTask({...newMaintenanceTask, estimatedDuration: e.target.value})}
+                    placeholder="e.g., 2 hours"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Assigned To
+                  </label>
+                  <input
+                    type="text"
+                    value={newMaintenanceTask.assignedTo}
+                    onChange={(e) => setNewMaintenanceTask({...newMaintenanceTask, assignedTo: e.target.value})}
+                    placeholder="Technician name"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Estimated Cost (₦)
+                  </label>
+                  <input
+                    type="number"
+                    value={newMaintenanceTask.cost}
+                    onChange={(e) => setNewMaintenanceTask({...newMaintenanceTask, cost: e.target.value})}
+                    placeholder="0"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Description
+                </label>
+                <textarea
+                  rows={3}
+                  value={newMaintenanceTask.description}
+                  onChange={(e) => setNewMaintenanceTask({...newMaintenanceTask, description: e.target.value})}
+                  placeholder="Describe the maintenance task..."
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Additional Notes
+                </label>
+                <textarea
+                  rows={2}
+                  value={newMaintenanceTask.notes}
+                  onChange={(e) => setNewMaintenanceTask({...newMaintenanceTask, notes: e.target.value})}
+                  placeholder="Any additional notes or special instructions..."
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="flex items-center justify-end space-x-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowScheduleModal(false)
+                    setNewMaintenanceTask({
+                      title: '',
+                      type: 'Preventive',
+                      priority: 'Medium',
+                      description: '',
+                      scheduledDate: '',
+                      estimatedDuration: '',
+                      assignedTo: '',
+                      category: '',
+                      cost: '',
+                      notes: ''
+                    })
+                  }}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center space-x-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4h3a1 1 0 011 1v9a1 1 0 01-1 1H5a1 1 0 01-1-1V8a1 1 0 011-1h3z" />
+                  </svg>
+                  <span>Schedule Maintenance</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

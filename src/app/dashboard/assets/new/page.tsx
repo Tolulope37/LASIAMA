@@ -307,15 +307,17 @@ export default function NewAssetPage() {
         return formData.name && formData.category && formData.subcategory && formData.type && formData.condition && formData.yearBuilt && formData.size
       case 2: // Physical Specifications
         return true // Optional fields
-      case 3: // Systems & Utilities
+      case 3: // Room Management
         return true // Optional fields
-      case 4: // Equipment Inventory
+      case 4: // Systems & Utilities
         return true // Optional fields
-      case 5: // Location & Financial
+      case 5: // Equipment Inventory
+        return true // Optional fields
+      case 6: // Location & Financial
         return formData.location && formData.lga && formData.zone && formData.assetValue && formData.department
-      case 6: // Documents & Media
+      case 7: // Documents & Media
         return true // Optional fields
-      case 7: // Maintenance & Audit
+      case 8: // Maintenance & Audit
         return true // Optional fields
       default:
         return true
