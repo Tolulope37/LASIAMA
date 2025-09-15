@@ -70,16 +70,16 @@ export default function RoomDetailsPage() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [editFormData, setEditFormData] = useState<Room>(room)
   const [newMaintenanceTask, setNewMaintenanceTask] = useState({
-    title: '',
+    title: 'Operating Theater Deep Cleaning and Equipment Calibration',
     type: 'Preventive',
-    priority: 'Medium',
-    description: '',
-    scheduledDate: '',
-    estimatedDuration: '',
-    assignedTo: '',
-    category: '',
-    cost: '',
-    notes: ''
+    priority: 'High',
+    description: 'Comprehensive cleaning of operating theater including sterilization of all surfaces, calibration of medical equipment, and inspection of HVAC systems to maintain sterile environment.',
+    scheduledDate: '2024-09-25',
+    estimatedDuration: '4 hours',
+    assignedTo: 'Medical Equipment Team',
+    category: 'Cleaning & Sterilization',
+    cost: '50000',
+    notes: 'Schedule during off-peak hours. Ensure all medical equipment is properly calibrated and certified after maintenance.'
   })
 
   const getStatusColor = (status: Room['status']) => {

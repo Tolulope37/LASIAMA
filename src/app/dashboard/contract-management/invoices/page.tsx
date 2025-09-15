@@ -36,18 +36,18 @@ export default function ContractInvoicesPage() {
   const [uploadingReceipt, setUploadingReceipt] = useState(false)
   const [showRecordModal, setShowRecordModal] = useState(false)
   const [newInvoice, setNewInvoice] = useState({
-    invoiceNumber: '',
-    vendor: '',
-    contractId: '',
-    contractTitle: '',
-    amount: '',
-    issueDate: '',
-    dueDate: '',
-    description: '',
-    category: 'Maintenance',
-    assetId: '',
-    assetName: '',
-    assetLocation: ''
+    invoiceNumber: 'INV-2024-0892',
+    vendor: 'MedEquip Solutions Ltd',
+    contractId: 'CON-2024-156',
+    contractTitle: 'Medical Equipment Maintenance Contract',
+    amount: '2850000',
+    issueDate: '2024-09-15',
+    dueDate: '2024-10-15',
+    description: 'Supply and installation of medical imaging equipment including MRI machine maintenance contract and staff training services',
+    category: 'Equipment',
+    assetId: '1',
+    assetName: 'Lagos State General Hospital',
+    assetLocation: 'Ikeja, Lagos State'
   })
 
   // Sample invoice data - Invoices received by Lasiama for payment

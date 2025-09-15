@@ -2410,16 +2410,16 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
   const [editFormData, setEditFormData] = useState<Record<string, unknown> | null>(null)
   const [showScheduleModal, setShowScheduleModal] = useState(false)
   const [newMaintenanceTask, setNewMaintenanceTask] = useState({
-    title: '',
+    title: 'Hospital-wide HVAC System Maintenance',
     type: 'Preventive',
-    priority: 'Medium',
-    description: '',
-    scheduledDate: '',
-    estimatedDuration: '',
-    assignedTo: '',
-    category: '',
-    cost: '',
-    notes: ''
+    priority: 'High',
+    description: 'Complete maintenance of central air conditioning system including filter replacement, coil cleaning, refrigerant level check, and system calibration to ensure optimal performance.',
+    scheduledDate: '2024-09-20',
+    estimatedDuration: '8 hours',
+    assignedTo: 'HVAC Maintenance Team',
+    category: 'HVAC Systems',
+    cost: '150000',
+    notes: 'Schedule during weekend to minimize disruption to hospital operations. Backup portable units may be needed for critical areas.'
   })
   
   // Equipment filtering state

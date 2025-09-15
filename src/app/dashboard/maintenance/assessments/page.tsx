@@ -111,18 +111,18 @@ export default function MaintenanceAssessmentsPage() {
   
   // New task form
   const [newTask, setNewTask] = useState({
-    title: '',
-    description: '',
-    priority: 'medium' as MaintenanceTask['priority'],
-    category: 'STRUCTURAL' as MaintenanceTask['category'],
-    location: '',
-    floor: '',
-    estimatedCost: '',
-    estimatedDuration: '',
-    assignedTo: '',
-    dueDate: '',
-    materials: '',
-    notes: ''
+    title: 'Emergency Generator Quarterly Maintenance',
+    description: 'Perform comprehensive maintenance of backup diesel generator including oil change, filter replacement, battery check, and load testing to ensure reliable operation during power outages.',
+    priority: 'high' as MaintenanceTask['priority'],
+    category: 'ELECTRICAL' as MaintenanceTask['category'],
+    location: 'Generator Room - Basement Level',
+    floor: 'Basement',
+    estimatedCost: '75000',
+    estimatedDuration: '6 hours',
+    assignedTo: 'Electrical Maintenance Team',
+    dueDate: '2024-09-30',
+    materials: 'Engine oil, air filters, fuel filters, battery electrolyte, spare fuses',
+    notes: 'Coordinate with hospital administration to schedule during low-demand periods. Ensure spare parts inventory is adequate before starting maintenance.'
   })
 
   const getPriorityColor = (priority: MaintenanceTask['priority']) => {

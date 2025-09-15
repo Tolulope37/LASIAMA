@@ -70,59 +70,79 @@ export default function NewAssetPage() {
   ]
 
   const [formData, setFormData] = useState({
-    name: "",
-    number: "",
-    description: "",
-    category: "",
-    subcategory: "",
+    name: "Lagos State General Hospital",
+    number: "LSGH-2024-001",
+    description: "Major public healthcare facility providing comprehensive medical services including emergency care, surgical procedures, and specialized treatments for Lagos State residents.",
+    category: "Building",
+    subcategory: "Healthcare Facility",
     status: "ACTIVE",
     condition: "Good",
-    location: "",
-    latitude: "",
-    longitude: "",
-    acquisitionDate: "",
-    yearBuilt: "",
-    assetValue: "",
-    size: "",
-    department: "",
-    type: "",
-    lga: "",
-    zone: "",
+    location: "1 Hospital Road, Ikeja, Lagos State",
+    latitude: "6.5952",
+    longitude: "3.3371",
+    acquisitionDate: "2020-01-15",
+    yearBuilt: "2018",
+    assetValue: "2500000000",
+    size: "15000",
+    department: "Lagos State Ministry of Health",
+    type: "Hospital",
+    lga: "Ikeja",
+    zone: "Lagos Mainland",
     openFaults: 0,
     maintenance: 0,
     // Building specifications
-    floors: "",
-    totalRooms: "",
-    capacity: "",
-    parkingSpaces: "",
-    elevators: "",
-    emergencyExits: "",
-    totalArea: "",
+    floors: "5",
+    totalRooms: "120",
+    capacity: "500",
+    parkingSpaces: "80",
+    elevators: "3",
+    emergencyExits: "8",
+    totalArea: "15000",
     // Construction details
-    foundationType: "",
-    structuralSystem: "",
-    exteriorWalls: "",
-    roofing: "",
-    flooring: "",
+    foundationType: "Reinforced Concrete Foundation",
+    structuralSystem: "Steel Frame with Concrete Infill",
+    exteriorWalls: "Brick Veneer with Insulation",
+    roofing: "Metal Roofing with Waterproof Membrane",
+    flooring: "Ceramic Tiles and Vinyl Flooring",
     // Utilities
-    hvacSystem: "",
-    electricalSystem: "",
-    waterSupply: "",
-    fireSystem: "",
-    securitySystem: "",
-    backupPower: "",
-    electricalLoad: "",
-    waterConsumption: "",
-    internetConnectivity: "",
+    hvacSystem: "Central Air Conditioning with Individual Room Controls",
+    electricalSystem: "440V/220V Three-Phase with Emergency Backup",
+    waterSupply: "Municipal Water with Booster Pumps",
+    fireSystem: "Sprinkler System with Smoke Detection",
+    securitySystem: "24/7 CCTV Monitoring with Access Control",
+    backupPower: "500KVA Diesel Generator with UPS Systems",
+    electricalLoad: "750KW",
+    waterConsumption: "50000L/day",
+    internetConnectivity: "Fiber Optic - 1Gbps Dedicated Line",
     // Equipment Inventory
-    airConditioningUnits: [{ type: '', brand: '', capacity: '', location: '' }],
-    doors: [{ type: '', material: '', dimensions: '', totalDoors: '' }],
-    windows: [{ type: '', material: '', dimensions: '', totalWindows: '' }],
-    lightingFixtures: [{ type: '', brand: '', totalFixtures: '' }],
-    electricalEquipment: [],
-    plumbingFixtures: [],
-    securitySystems: [],
-    otherEquipment: [] as EquipmentItem[],
+    airConditioningUnits: [
+      { type: 'Central Unit', brand: 'Daikin', capacity: '50 Tons', location: 'Main Building' },
+      { type: 'Window Unit', brand: 'LG', capacity: '2.5 HP', location: 'Administrative Offices' }
+    ],
+    doors: [
+      { type: 'Security Door', material: 'Steel', dimensions: '2.1m x 1m', totalDoors: '25' },
+      { type: 'Fire Door', material: 'Steel with Fire Rating', dimensions: '2.1m x 1m', totalDoors: '15' }
+    ],
+    windows: [
+      { type: 'Double Glazed', material: 'Aluminum Frame', dimensions: '1.5m x 1.2m', totalWindows: '180' },
+      { type: 'Fixed Glass', material: 'Steel Frame', dimensions: '3m x 2m', totalWindows: '20' }
+    ],
+    lightingFixtures: [
+      { type: 'LED Panel', brand: 'Philips', totalFixtures: '450' },
+      { type: 'Emergency Lighting', brand: 'Schneider', totalFixtures: '120' }
+    ],
+    electricalEquipment: [
+      { type: 'Main Distribution Panel', brand: 'Schneider Electric', specifications: '1600A, IP54', location: 'Electrical Room', quantity: '1', description: 'Main power distribution' }
+    ],
+    plumbingFixtures: [
+      { type: 'Medical Sink', brand: 'Kohler', specifications: 'Stainless Steel, Hands-free', location: 'Operating Theaters', quantity: '12', description: 'Surgical hand washing stations' }
+    ],
+    securitySystems: [
+      { type: 'CCTV System', brand: 'Hikvision', specifications: '4K Resolution, Night Vision', location: 'Building-wide', quantity: '85', description: 'Security surveillance cameras' }
+    ],
+    otherEquipment: [
+      { type: 'Medical Gas System', brand: 'BeaconMedaes', specifications: 'Oxygen, Vacuum, Compressed Air', location: 'All Patient Areas', quantity: '1', description: 'Central medical gas supply system' }
+    ] as EquipmentItem[],
     // Documents
     documents: [],
     // Images
@@ -141,8 +161,35 @@ export default function NewAssetPage() {
     conferenceRooms: "",
     securityOffice: "",
     // Room Management
-    buildingFloors: [] as Floor[],
-    roomManagementEnabled: false,
+    buildingFloors: [
+      {
+        number: 1,
+        name: "Ground Floor",
+        rooms: [
+          {
+            id: "GF-001",
+            number: "GF-001",
+            name: "Emergency Reception",
+            floor: 1,
+            type: "Emergency",
+            area: 120,
+            capacity: 50,
+            status: "Active",
+            position: { x: 50, y: 50, width: 100, height: 80 },
+            equipment: [
+              { id: "eq-001", name: "Defibrillator", type: "Medical", status: "Working" }
+            ],
+            occupancy: { current: 15, maximum: 50 },
+            lastInspection: "2024-09-01",
+            nextMaintenance: "2024-12-01"
+          }
+        ],
+        totalArea: 3000,
+        totalRooms: 25,
+        dimensions: { width: 800, height: 600 }
+      }
+    ] as Floor[],
+    roomManagementEnabled: true,
     // Accessibility
     wheelchairAccessible: "",
     elevatorAccess: "",
@@ -165,16 +212,16 @@ export default function NewAssetPage() {
   const [showAddRoomModal, setShowAddRoomModal] = useState(false)
   const [selectedFloorForRoom, setSelectedFloorForRoom] = useState<number | null>(null)
   const [newFloor, setNewFloor] = useState({
-    number: 1,
-    name: '',
+    number: 2,
+    name: 'First Floor - Medical Wards',
     dimensions: { width: 800, height: 600 }
   })
   const [newRoom, setNewRoom] = useState({
-    number: '',
-    name: '',
-    type: 'Office' as Room['type'],
-    area: 0,
-    capacity: 0,
+    number: 'W-201',
+    name: 'General Medical Ward',
+    type: 'Ward' as Room['type'],
+    area: 150,
+    capacity: 20,
     position: { x: 100, y: 100, width: 120, height: 80 }
   })
 
